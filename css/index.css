@@ -158,7 +158,7 @@ a{
 
 .user_input input, #pass_input input, .regInput input{
 	width:180px;
-	color:#c8c8c9;
+	color:#000;
 	font-size:16px;
 	font-weight: bold;
 	height:38px;
@@ -413,6 +413,9 @@ a{
 	background:url("../images/shrlinActive.png") no-repeat;
 }
 
+
+
+
 #friends_online, #search_friends, #profile, #mail_box{
 	float:left;
 	width:148px;
@@ -436,6 +439,106 @@ a{
 	background:url("../images/massBox.png") no-repeat center;
 	position:relative;
 }
+
+
+
+
+.mb_wrap{
+	float: right;
+	width:100px;
+	height:100px;
+	background:url("../images/bg_mb.png") no-repeat;
+	background-size: 100%;
+	/*position: relative;*/
+}
+
+
+.mb_wrap:hover{
+	background:url("../images/bg_mb_active.png") no-repeat;
+	background-size: 100%;
+}
+
+.mb_wrap .text{
+	width: 100%;
+	text-align: center;
+	color: #fff;
+	font-size: 14px;
+	margin-top: 75px;
+}
+
+
+#friends_online, #search_friends, #profile, #mail_box, #looked_me, #looked_them,  #contacted_them, #favorites, #fav_me, #update_profile{
+	float:right;
+	width:100%;
+	height:100%;
+}
+
+
+
+
+
+#friends_online{
+	background:url("../images/friends_online_button.png") no-repeat 50% 30%;
+	background-size: 60%;
+}
+
+
+#search_friends{
+	background:url("../images/search_friends_button.png") no-repeat 50% 30%;
+	background-size: 60%;
+}
+
+#profile{
+	background:url("../images/profile_button.png") no-repeat 50% 30%;
+	background-size: 60%;
+}
+
+#mail_box{
+	background:url("../images/mail_box_button.png") no-repeat 50% 30%;
+	position:relative;
+	background-size: 60%;
+}
+
+
+#looked_me{
+	background:url("../images/looked_me_button.png") no-repeat 50% 30%;
+	background-size: 80%;
+}
+
+#looked_them{
+	background:url("../images/looked_them_button.png") no-repeat 50% 30%;
+	background-size: 80%;
+}
+
+#contacted_them{
+	background:url("../images/contacted_them_button.png") no-repeat 50% 30%;
+	background-size: 40%;
+}
+
+#favorites{
+	background:url("../images/favorites_button.png") no-repeat 50% 30%;
+	background-size: 40%;
+}
+
+#fav_me{
+	background:url("../images/fav_me_button.png") no-repeat 50% 30%;
+	background-size: 80%;
+}
+
+#update_profile{
+	background:url("../images/update_profile_button.png") no-repeat 50% 30%;
+	background-size: 45%;
+}
+
+
+
+
+
+
+
+
+
+'
 
 #why_subscr{
 	width:291px;
@@ -1080,11 +1183,6 @@ a .mail_section{
 	/*background: url("../images/stat_button.png") no-repeat left;*/	
 }
 
-#update_profile{	
-	background: url("../images/update_profile_button.png") no-repeat center;
-	margin:0 auto 0 auto;
-}
-
 #upload_image{
 	/*background: url("../images/upload_image_button.png") no-repeat right;*/
 	/*background: url("../images/upload_image_button2.png") no-repeat right;*/	
@@ -1210,6 +1308,16 @@ a .mail_section{
 }
 
 
+.noPicture{
+	width: 33%;
+}
+
+.noPicture img{
+	width:100%;
+	min-height:88px;
+	/*float:left;*/
+	border: 2px solid #fff;
+}
 
 
 #user_pictures{
@@ -1489,6 +1597,8 @@ a .mail_section{
 #recovery_page,
 #EULA_page,
 #report_abuse_page,
+#edit_profile_page,
+#contact_us_page,
 .pic_wrap,
 .appTemplates,
 .new_mes_count, 
@@ -1703,3 +1813,105 @@ margin-left:-20%;
 	height:20px;
 	background: url('../images/loader.gif') no-repeat center center;
 }
+
+
+
+
+
+
+
+
+#edit_profile_page .save .formButton{
+	margin-left: 25px;
+}
+
+
+
+
+#edit_profile_page .edit {
+	color: #fff;
+	font-size: 16px;
+	line-height: 50px;
+}
+
+#edit_profile_page .sf_txt{
+	font-weight: bold;
+	line-height: 50px;
+	/*display:table;*/
+}
+
+#edit_profile_page .sf_sel_wrap, #edit_profile_page .edit div{
+	min-height:50px;
+	box-sizing: border-box;
+	padding-right:10px;
+}
+
+#edit_profile_page .sf_txt span {
+	/*display: table-cell;
+	 vertical-align: middle;*/
+	color: #fff;
+}
+
+#edit_profile_page .edit button.formButton {
+	font-size: 15px;
+	margin-top: 10px;
+	float: left;
+}
+
+#edit_profile_page .ui-btn {
+	padding: 0;
+}
+
+#edit_profile_page input[type="text"], #edit_profile_page input[type="password"] {
+	font-size: 15px;
+	color: #505050;
+	text-align: right;
+	direction: rtl;
+	height:40px;
+	
+	margin-bottom: 20px;
+	margin-top: 20px;
+	
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	-khtml-border-radius:5px;
+	border-radius:5px;
+	
+}
+
+
+.textar {
+	max-height: 51px;
+	line-height: 1em;
+	font-size: 12px;
+	overflow: auto;
+	padding: 10px 0;
+}
+
+.formButton {
+	background: #e800a6;
+	color: #fff;
+	background-size: 100% 100%;
+	padding: 8px 5px;
+	border-radius: 5px;
+}
+
+.devider{
+	width:100%;
+	height:1px;
+	border-bottom: 1px solid #bababa;
+	cler:both;
+}
+
+#messageToAdmin{
+	height: 150px;
+	width: 100%;
+}
+
+
+
+
+
+
+
+
