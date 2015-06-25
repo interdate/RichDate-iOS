@@ -437,7 +437,7 @@
 			<div id="my_profile_page" class="appPage">
 				<div class="myProfileWrap">
 					<div data-role="content" data-scroll="false" class="myProf">
-						<h1>פרופיל שלי</h1>
+						<h1>הפרופיל שלי</h1>
 						<div class="dots"></div>
 						<div id="my_info_wrap">
 							<div id="my_info">
@@ -448,6 +448,7 @@
 								<div class="txt">
 									<strong><span></span></strong><br />
 									<span></span><br />
+									<div></div>
 								</div>
 							</div>
 						</div>
@@ -552,17 +553,6 @@
 								<div class="sf_sel_wrap2 age_1"></div>
 								<div class="sf_txt2"> עד </div>
 								<div class="sf_sel_wrap2 age_2"></div>
-							</div>
-							<!-- <div class="sf_txt">העדפה:</div>
-							 <div class="sf_sel_wrap sexPreferenceList">
-							 <fieldset data-role="controlgroup"></fieldset>
-							 </div>	 -->
-							<div class="sf_txt">מין:</div>
-							<div class="sf_sel_wrap gen">
-								<select name="gen" data-role="slider" data-iconpos="left">
-									<option value="1">זכר</option>
-									<option value="0">נקבה</option>
-								</select>
 							</div>
 							<div class="sf_txt">כינוי:</div>
 							<div class="sf_sel_wrap">
@@ -765,7 +755,7 @@
 						
 						<br><br><br><br><br><br>
 						
-						<button data-theme="a" onclick="IAP.restore();">Restore previous purchases</button>
+						<button data-theme="a" onclick="IAP.restore();">שחזר רכישות קודמות</button>
 
 
 						
@@ -829,7 +819,7 @@
 								</div>
 								<div class="clear"></div>
 								
-								<div class="regTxt lineHeight_50">צבע השער</div>
+								<div class="regTxt lineHeight_50">צבע השיער</div>
 								<div class="regInput hairColorList">
 									
 								</div>
@@ -915,7 +905,7 @@
 								<div class="clear"></div>
 								
 								
-								<div class="regTxt mar_top_8">מה אני מחפשת</div>
+								<div class="regTxt mar_top_8">מה אני מחפש/ת</div>
 								<div class="regInput"><textarea name="lookingFor" id="lookingFor" data-role="none"></textarea></div>
 								<div class="clear"></div>
 								
@@ -926,11 +916,13 @@
 								
 								<br />
 								<br />
-								אני מסכימה
+								<div class="regTxt" style="width: 90%;">
+								אני מסכים/ה
 								
-								ל<span onclick="window.open('http://www.shedate.co.il/dyncpage.asp?pageId=7', '_blank', 'location=yes');" style="text-decoration:underline; font-weight:bold;">תנאי השימוש</span>
+								ל<span onclick="window.open('http://www.richdate.co.il/dyncpage.asp?pageId=7', '_blank', 'location=yes');" style="text-decoration:underline; font-weight:bold;">תנאי השימוש</span>
 								באתר
 								
+								</div>
 								<br />
 								<div data-role="fieldcontain">
 									<select name="confirm" id="confirm" data-role="slider" data-theme="c" data-track-theme="c">
@@ -1072,6 +1064,7 @@
 				<div class="[MESSAGE_TYPE] [MESSAGE_FLOAT]">
 					[MESSAGE]
 					<div class="buySubscr"><button onclick="app.getSubscription();" data-theme="a">רכישת מנוי</button></div></div>
+				<div class="message_status [MESSAGE_STATUS_VISIBILITY]"><img src="images/[MESSAGE_STATUS_IMAGE]"></div>
 				<div class="message_info [INFO]">נשלח ב: [DATE] בשעה: [TIME]</div>
 			</div>
 			<!-- END Chat Message Template -->
@@ -1135,7 +1128,7 @@
 						<div style="width: 70%;float: right;">
 							<input type="password" name="pass2" id="editedUserPass2" value="[userPass]" data-role="none" />
 						</div>
-						<span style="position: absolute;right: -50%;top:47%; font-weight:bold;">סיסמה שנית</span>
+						<span style="position: absolute;right: -50%;top:47%; font-weight:bold; color: #fff;">סיסמה שנית</span>
 						<div class="clear"></div>
 						<button data-role="none" name="submit" onclick="app.saveProf(this,'input:first');return false;" class="formButton">שמירה</button>
 						<button data-role="none" name="cancel" id="cancelNick" onclick="app.editProf(this);return false;" class="formButton">ביטול</button>
@@ -1155,7 +1148,7 @@
 				<div class="sf_sel_wrap">
 					<div class="save" style="display: none;" >
 						<div style="float: right;width:70%;" >
-							<input type="text" name="userEmail" id="Email" data-role="none" value="[userEmail]" style="direction: ltr;" onclick="$(this).css({'background':'none'});" onkeyup="$(this).css({'background':'none'});" />
+							<input type="text" name="userEmail" id="Email" data-role="none" value="[userEmail]" style="direction: ltr;"  />
 						</div>
 						<div class="clear"></div>
 						<button data-role="none" name="submit" onclick="app.saveProf(this,'input');return false;" class="formButton">שמירה</button>
@@ -1227,7 +1220,7 @@
 				
 				<div class="devider"></div>
 				
-				<div class="sf_txt" style="line-height: normal;margin-top:10px;"><span>אני מחפשת</span></div>
+				<div class="sf_txt" style="line-height: normal;margin-top:10px;"><span>אני מחפש/ת</span></div>
 				<div class="sf_sel_wrap">
 					<div class="save" style="display: none;" >
 						<div style="width: 70%;float: right;">

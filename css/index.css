@@ -156,7 +156,7 @@ a{
 	margin-top:8px;
 }
 
-.user_input input, #pass_input input, .regInput input{
+.user_input input, #pass_input input, .regInput input, .regInput textarea{
 	width:180px;
 	color:#000;
 	font-size:16px;
@@ -190,6 +190,10 @@ a{
 .user_input input, #pass_input input{
 	border:0px;
 	background: #ececec;	
+}
+
+.regInput textarea {
+	height: 100px;
 }
 
 /*
@@ -1074,6 +1078,20 @@ a .mail_section{
 .message_out{
 	background-image: url("../images/mes_out_bg.png");
 	background-color:#e0e1e2;	
+}
+
+.message_status {
+	float: right;
+	width: 39px;
+	height: 23px;
+	margin-right: 10px;
+}
+
+.message_status img {
+	height: 16px;
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
 }
 
 .message_info{

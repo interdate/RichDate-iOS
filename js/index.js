@@ -87,6 +87,7 @@ var app = {
 	logged: false,
 	exit: false,
 	newMessagesCount : 0,
+	contactCurrentReadMessagesNumber : 0,
 	
 	EULA: false,
 	
@@ -129,7 +130,8 @@ var app = {
 					app.stopLoading();
 					app.showPage('login_page');
 					//app.printUsers();
-					app.alert('הכנסת מידע שגוי, אנא נסה שנית');
+					//app.alert('הכנסת מידע שגוי, אנא נסה שנית');
+					app.alert(response.responseText.split('{')[0]);
 					
 				}
 				
@@ -142,7 +144,7 @@ var app = {
 				
 			complete: function(response, status, jqXHR){
 				app.stopLoading();
-					console.log(JSON.stringify(response));
+					//console.log(JSON.stringify(response));
 			},
 		});
 	},
@@ -416,6 +418,7 @@ var app = {
 					window.localStorage.setItem("userInput", user);
 					app.loggedUserInit();
 					//document.removeEventListener("backbutton", app.back, false);
+				    window.scrollTo(0, 0);
 				}				
 			}
 		});
@@ -709,8 +712,8 @@ var app = {
 			var ageFrom = $(".age_1 select").val();
 			var ageTo = $(".age_2 select").val();			
 			var nickName = $('.nickName').val();
-			var userGender=$('.gen select').val();
-			app.requestUrl = app.apiUrl + '/api/v3/users/search/region:'+region+'/age:'+ageFrom+'-'+ageTo+'/userGender:'+userGender+'/nickName:'+nickName+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
+			
+			app.requestUrl = app.apiUrl + '/api/v3/users/search/region:'+region+'/age:'+ageFrom+'-'+ageTo+'/nickName:'+nickName+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}	
 		else if(app.action == 'getStatResults'){					
 			app.requestUrl = app.apiUrl + '/api/v3/user/statistics/'+app.statAction+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
@@ -747,7 +750,7 @@ var app = {
 			
 			
 		if(app.response.users.itemsNumber == 0){
-			app.container.html('<div class="center noResults">אין תוצאות</div>')
+			app.container.append('<div class="center noResults">אין תוצאות</div>')
 			return;
 		}
 			
@@ -868,7 +871,7 @@ var app = {
 				app.container = app.currentPageWrapper.find('.myProfileWrap');		
 				app.container.find('.txt strong').html(user.nickName+', <span>'+user.age+'</span>');			
 				app.container.find('.txt strong').siblings('span').text(user.city); 
-				app.container.find('.txt').append(user.about);			
+				app.container.find('.txt div').html(user.about);
 				app.container.find('.user_pic img').attr("src",user.mainImage.url);
 				if(user.isPaying == 1){
 					console.log(user.isPaying);
@@ -1011,7 +1014,13 @@ var app = {
 				var html = '<select name="regionCode">';
 				if(app.currentPageId == 'search_form_page'){
 					html = html + '<option value="">לא חשוב</option>';
-				}				
+				}
+				else if(app.currentPageId == 'register_page'){
+				    html = html + '<option value="">בחרו</option>';
+				}
+			   
+			   
+			   
 				app.container.find(".regionsList").html('');
 				//app.container.find("#cities_wrap").hide();
 				//app.container.find(".citiesList").html('');
@@ -1076,16 +1085,20 @@ var app = {
 			var data = JSON.stringify(
 				$('#regForm').serializeObject()
 			);
+			
+			//console.log("SEND:  " + data);
+			//console.log("---------------------------------------------------------------------------------");
+			
 			$.ajax({
 				url: app.apiUrl + '/api/v3/user',
 				type: 'Post',
 				data: data,
 				   error: function(response){
-						alert( JSON.stringify(response));
+						//console.log("ERROR: " + JSON.stringify(response));
 				   },
 				success: function(response){
 					app.response = response;
-					//alert( JSON.stringify(app.response));
+					//console.log("SUCCESS: " + JSON.stringify(app.response));
 					if(app.response.result > 0){
 						var user = app.container.find("#userEmail").val(); 
 						var pass = app.container.find("#userPass").val();						
@@ -1093,7 +1106,6 @@ var app = {
 						window.localStorage.setItem("pass",pass);
 						window.localStorage.setItem("userId", app.response.result);
 						app.ajaxSetup();
- 						console.log(data);
 						app.getRegStep(data);
 					}
 					else{
@@ -1157,14 +1169,96 @@ var app = {
 			alert('תאריך לידה שגוי');
 			return false;
 		}
-		if($('#userCity').val().length == 0){
-			alert('עיר שגויה');
+		
+		
+		
+		
+		if (!app.container.find('.heightList select').val().length) {
+			app.alert('גובה שגוי');
 			return false;
 		}
-		/*if($('#confirm option:selected').val() != "1"){
-			alert('Please check confirmation box');
+		
+		if (!app.container.find('.bodyTypeList select').val().length) {
+			app.alert('מבנה גוף שגוי');
 			return false;
-		}*/
+		}
+		
+		if (!app.container.find('.eyesColorList select').val().length) {
+			app.alert('צבע עיניים שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.hairColorList select').val().length) {
+			app.alert('צבע השער שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.hairLengthList select').val().length) {
+			app.alert('תסרוקת שגויה');
+			return false;
+		}
+		
+		if(!app.container.find('.relationshipTypeList input[type="checkbox"]:checked').size()){
+			app.alert('פה למטרה שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.economyList select').val().length) {
+			app.alert('מצב כלכלי שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.maritalStatusList select').val().length) {
+			app.alert('מצב משפחתי שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.childrenList select').val().length) {
+			app.alert('מספר ילדים שגוי');
+			return false;
+		}
+		
+		if (!app.container.find('.originList select').val().length) {
+			app.alert('מוצא שגוי');
+			return false;
+		}
+		
+		
+		if (!app.container.find('.smokingList select').val().length) {
+			app.alert('הרגלי עישון שגויים');
+			return false;
+		}
+		
+		if (!app.container.find('.drinkingList select').val().length) {
+			app.alert('הרגלי שתיה שגויים');
+			return false;
+		}
+		
+		if (!app.container.find('.regionsList select').val().length) {
+			app.alert('איזור שגוי');
+			return false;
+		}
+		
+		if(app.container.find('#userCity').val().length == 0){
+			app.alert('עיר שגויה');
+			return false;
+		}
+		
+		if(app.container.find('#aboutMe').val().length < 10){
+			app.alert('על עצמי שגוי (אמור להיות 10 סימנים לפחות)');
+			return false;
+		}
+		
+		if(app.container.find('#lookingFor').val().length < 10){
+			app.alert('מה אני מחפש/ת שגוי (אמור להיות 10 סימנים לפחות)');
+			return false;
+		}
+		
+		if(app.container.find('#confirm option:selected').val() != "1"){
+			app.alert('אנא סמנו בתיבה');
+			return false;
+		}
+		
 		return true;
 	},
 	
@@ -1534,10 +1628,14 @@ var app = {
 		app.chatWith = chatWith;
 		app.startLoading();
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith,									
+			url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith,
+			   error:function(response){
+			   console.log(JSON.stringify(app.response));
+			   },
 			success: function(response){				
 				app.response = response;
-				//alert(JSON.stringify(app.response));
+				app.contactCurrentReadMessagesNumber = app.response.contactCurrentReadMessagesNumber;
+				console.log(JSON.stringify(app.response));
 				app.showPage('chat_page');
 				window.scrollTo(0, 0);
 				app.container = app.currentPageWrapper.find('.chat_wrap');
@@ -1568,11 +1666,34 @@ var app = {
 			var currentTemplate = app.template; 
 			var message = app.response.chat.items[i];
 			
+			
+			if(app.chatWith == message.from){
+				message.text = message.text + appendToMessage;
+				var messageType = "message_in";
+				var messageFloat = "left";
+				var messageStatusVisibility = 'hidden';
+				var messageStatusImage = '';
+				var info = "info_left";
+				//var isRead = "";
+			}
+			else {
+				var messageType = "message_out";
+				var messageFloat = "right";
+				var info = "info_right";
+				var messageStatusVisibility = '';
+				var messageStatusImage = (message.isRead == 1) ? 'messageRead.jpg' : 'messageSaved.jpg';
+				console.log(message.isRead);
+				//var isRead = (message.isRead == 0) ? "checked" : "double_checked";
+			}
+			
+			
+			/*
 			if(app.chatWith == message.from){
 				var messageType = "message_in";				
 			} 
 			else 
 				var messageType = "message_out";
+			
 			
 			if(from == message.from) k--;
 			
@@ -1584,19 +1705,22 @@ var app = {
 				messageFloat = "left";
 				info = "info_left";
 			}
+			 */
 			
 			currentTemplate = currentTemplate.replace("[MESSAGE]", message.text);
 			currentTemplate = currentTemplate.replace("[DATE]", message.date);
 			currentTemplate = currentTemplate.replace("[TIME]", message.time);
 			currentTemplate = currentTemplate.replace("[MESSAGE_TYPE]", messageType);
 			currentTemplate = currentTemplate.replace("[MESSAGE_FLOAT]", messageFloat);
+			currentTemplate = currentTemplate.replace("[MESSAGE_STATUS_VISIBILITY]", messageStatusVisibility);
+			currentTemplate = currentTemplate.replace("[MESSAGE_STATUS_IMAGE]", messageStatusImage);
 			currentTemplate = currentTemplate.replace("[INFO]", info);
 			
 			html = html + currentTemplate;
 			
-			var from = message.from;
+			//var from = message.from;
 			
-			k++;
+			//k++;
 		}
 		
 		return html;
@@ -1632,23 +1756,22 @@ var app = {
 	refreshChat: function(){
 		if(app.currentPageId == 'chat_page'){
 			$.ajax({
-				url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith+'/refresh',
+				url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith+'/'+app.contactCurrentReadMessagesNumber+'/refresh',
 				type: 'Get',
 				complete: function(response, status, jqXHR){					
 					//app.stopLoading();
 				},
 				success: function(response){
-					if(response.chat != false){							
-						if(app.currentPageId == 'chat_page'){
-							app.response = response;
-							//alert(JSON.stringify(app.response));
-							var html = app.buildChat();
-							app.container.html(html);	
+					if(app.currentPageId == 'chat_page'){
+					    app.response = response;
+					    app.contactCurrentReadMessagesNumber = app.response.contactCurrentReadMessagesNumber;
+						var html = app.buildChat();
+						if(app.response.chat != false){
+							app.container.html(html);
 							app.subscribtionButtonHandler();
 						}
+        				refresh = setTimeout(app.refreshChat, 100);
 					}
-					refresh = setTimeout(app.refreshChat, 100);
-					
 				}
 			});
 		}
@@ -1885,8 +2008,8 @@ var app = {
 	$.ajax({
 		   url: app.apiUrl + '/api/v3/user/data',
 		   success: function(response){
+		   console.log(JSON.stringify(response));
 		   user = response.user;
-		   //alert(JSON.stringify(response));
 		   app.showPage('edit_profile_page');
 		   app.container = app.currentPageWrapper.find('.edit_wrap');
 		   app.container.html('');
@@ -1988,7 +2111,7 @@ saveProf: function (el,tag){
 	
 	if(name == 'userLookingFor'){
 		if(app.container.find('#userLookingFor').val().length < 10){
-			app.alert('מה אני מחפשת שגוי (אמור להיות 10 סימנים לפחות)');
+			app.alert('מה אני מחפש/ת שגוי (אמור להיות 10 סימנים לפחות)');
 			return false;
 		}
 	}
