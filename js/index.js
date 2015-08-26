@@ -67,7 +67,7 @@ var app = {
 	requestMethod : '',
 	response : '',
 	responseItemsNumber : '',
-	pageNumber : '',
+	pageNumber : 1,
 	itemsPerPage : 30,
 	container : '', 
 	template : '',
@@ -180,7 +180,7 @@ var app = {
 		//app.exit = true;
 		
 		$.ajax({				
-			url: app.apiUrl + '/api/v3/user/logout',			
+			url: app.apiUrl + '/api/v4/user/logout',			
 			success: function(data, status){	
 				//alert(JSON.stringify(data));
 				if(data.logout == 1){					
@@ -248,7 +248,7 @@ var app = {
 	checkloggedStatus: function(){
 		if(app.logged !== true && app.logged !== false){
 			$.ajax({
-				url: app.apiUrl + '/api/v3/user/login',
+				url: app.apiUrl + '/api/v4/user/login',
 				type: 'Get',
 				error: function(response){				
 					//alert(JSON.stringify(response));
@@ -310,7 +310,7 @@ var app = {
 		}
 	
 		$.ajax({ 
-			url: app.apiUrl + '/api/v3/user/login',
+			url: app.apiUrl + '/api/v4/user/login',
 			error: function(response){				
 				console.log(JSON.stringify(response));
 			},
@@ -348,7 +348,7 @@ var app = {
 	
 	setBannerDestination: function(){
 		$.ajax({				
-			url: app.apiUrl + '/api/v3/user/banner',			
+			url: app.apiUrl + '/api/v4/user/banner',			
 			success: function(response, status){
 				app.response = response;
 				//alert(JSON.stringify(app.response));   
@@ -386,7 +386,7 @@ var app = {
 		
 		
 		$.ajax({				
-			url: app.apiUrl + '/api/v3/user/login',			
+			url: app.apiUrl + '/api/v4/user/login',			
 			beforeSend: function(xhr){
 				user = window.localStorage.getItem("user");
 				pass = window.localStorage.getItem("pass");	
@@ -440,7 +440,7 @@ var app = {
 		//return;
 		
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/location',
+			url: app.apiUrl + '/api/v4/user/location',
 			type: 'Post',
 			data:JSON.stringify(data),
 			success: function(response){
@@ -547,7 +547,7 @@ var app = {
     
     persistGcmDeviceId: function(){
     	$.ajax({				
-			url: app.apiUrl + '/api/v3/user/gcmDeviceId',
+			url: app.apiUrl + '/api/v4/user/gcmDeviceId',
 			type: 'Post',
 			data: JSON.stringify({			
 				gcmDeviceId: app.gcmDeviceId 
@@ -597,7 +597,14 @@ var app = {
 			app.template = $('#userDataTemplate').html();
 			console.log(app.recentScrollPos);
 			window.scrollTo(0, app.recentScrollPos);
-			app.setScrollEventHandler();
+			app.setScrollEventHandler(2500,3500);
+		}
+		else if(app.currentPageId == 'messenger_page'){
+			app.template = $('#messengerTemplate').html();
+			console.log(app.recentScrollPos);
+			window.scrollTo(0, app.recentScrollPos);
+			app.setScrollEventHandler(1000,2000);
+			
 		}
 		else{
 			var usersListPage = pagesTracker[pagesTracker.length-2];
@@ -689,6 +696,7 @@ var app = {
 		//app.container.append('<h1>תוצאות</h1><div class="dots"></div>');
 		app.action = 'getOnlineNow';
 		app.pageNumber = 1;
+		app.itemsPerPage = 30;
 		app.getUsers();
 	},
 	
@@ -704,7 +712,7 @@ var app = {
 		}
 		
 		if(app.action == 'getOnlineNow'){					
-			app.requestUrl = app.apiUrl + '/api/v3/users/online/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
+			app.requestUrl = app.apiUrl + '/api/v4/users/online/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}	
 		else if(app.action == 'getSearchResults'){
 			//var countryCode = $('#countries_list').val();
@@ -713,17 +721,18 @@ var app = {
 			var ageTo = $(".age_2 select").val();			
 			var nickName = $('.nickName').val();
 			
-			app.requestUrl = app.apiUrl + '/api/v3/users/search/region:'+region+'/age:'+ageFrom+'-'+ageTo+'/nickName:'+nickName+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
+			app.requestUrl = app.apiUrl + '/api/v4/users/search/region:'+region+'/age:'+ageFrom+'-'+ageTo+'/nickName:'+nickName+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}	
 		else if(app.action == 'getStatResults'){					
-			app.requestUrl = app.apiUrl + '/api/v3/user/statistics/'+app.statAction+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
+			app.requestUrl = app.apiUrl + '/api/v4/user/statistics/'+app.statAction+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}
 		
 		getUsersRequest = $.ajax({
 			url: app.requestUrl,
 			timeout:10000,
 			success: function(response, status){
-			   app.response = response;
+//								 console.log("SUCCESS");
+				app.response = response;
 			   app.sortButtonsHandle();
 			   
 				//alert(JSON.stringify(app.response));
@@ -746,7 +755,8 @@ var app = {
 		$('.loadingHTML').remove();
 		
 		var userId = window.localStorage.getItem("userId");
-			
+		
+			console.log(app.response.users.itemsNumber);
 			
 			
 		if(app.response.users.itemsNumber == 0){
@@ -810,7 +820,7 @@ var app = {
 			$(loadingHTML).insertAfter(currentUserNode);
 		}
 			
-		app.setScrollEventHandler();
+		app.setScrollEventHandler(2500,3500);
 
 		
 		}
@@ -821,21 +831,39 @@ var app = {
 	},
 	
 		
-	setScrollEventHandler: function(){
+	setScrollEventHandler: function(min1, min2){
 		$(window).scroll(function(){	
-			var min=2500;
-			
-			if($(this).width()>767) min=3500;
+			//var min=2500;
+						 
+			min = min1;
+			if($(this).width()>767) min = min2;
+						 
+						 
 			app.recentScrollPos = $(this).scrollTop();
 			console.log('setScrollEventHandler:' + app.recentScrollPos);
+			console.log(app.recentScrollPos + ':' + app.container.height());
+//			alert(app.recentScrollPos + ' > ' + app.container.height() +' - ' +min);
+
 						 
-			if(app.recentScrollPos >= app.container.height()-min){	
-				//alert(app.recentScrollPos);
-				$(this).unbind("scroll");				
-				if(app.responseItemsNumber == app.itemsPerPage){					
+						 
+			if(app.recentScrollPos >= app.container.height()-min){
+				$(this).unbind("scroll");
+						 
+				 //alert(app.recentScrollPos);
+
+						 
+				if(app.responseItemsNumber == app.itemsPerPage){
+						 
 					app.pageNumber++;					
-					app.getUsers();
+					
+					 if(app.currentPageId == 'messenger_page'){
+						 app.getMessenger();
+					 }
+					 else{
+						app.getUsers();
+					 }
 				}
+				//else alert(app.itemsPerPage);
 			}
 		});
 	},
@@ -863,7 +891,7 @@ var app = {
 		});	
 		var userId = window.localStorage.getItem("userId");		
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/profile/'+userId,						
+			url: app.apiUrl + '/api/v4/user/profile/'+userId,						
 			success: function(user, status, xhr){
 				console.log(JSON.stringify(user));
 			   
@@ -907,6 +935,7 @@ var app = {
 		app.container = app.currentPageWrapper.find('.content_wrap');
 		//app.container.append('<h1>תוצאות</h1><div class="dots"></div>');
 		app.pageNumber = 1;
+		app.itemsPerPage = 30;
 		app.action = 'getStatResults';
 		app.statAction = statAction;		
 		app.getUsers();
@@ -925,7 +954,7 @@ var app = {
             return false;
         }
         $.ajax({
-        	url: app.apiUrl + '/api/v3/recovery/'+mail,
+        	url: app.apiUrl + '/api/v4/recovery/'+mail,
         	success: function(response){
         		//alert(JSON.stringify(response));
         		if(!response.err)
@@ -971,7 +1000,7 @@ var app = {
 		
 /*	getSexPreference: function(){
 		$.ajax({			
-			url: app.apiUrl + '/api/v3/list/sexPreference',						
+			url: app.apiUrl + '/api/v4/list/sexPreference',						
 			success: function(list, status, xhr){							
 				var html = '';	
 				if(app.currentPageId == 'register_page'){
@@ -1009,7 +1038,7 @@ var app = {
 	
 	getRegions: function(){
 		$.ajax({
-			url: app.apiUrl + '/api/v3/list/regions',						
+			url: app.apiUrl + '/api/v4/list/regions',						
 			success: function(list, status, xhr){							
 				var html = '<select name="regionCode">';
 				if(app.currentPageId == 'search_form_page'){
@@ -1052,7 +1081,7 @@ var app = {
 	/*
 	getCities: function(countryCode,regionCode){
 		$.ajax({
-			url: 'http://m.shedate.co.il/api/v3/list/cities/'+countryCode+'/'+regionCode,						
+			url: 'http://m.shedate.co.il/api/v4/list/cities/'+countryCode+'/'+regionCode,						
 			success: function(list, status, xhr){
 				app.container.find("#cities_wrap").hide();				
 				if(list.itemsNumber > 0){
@@ -1090,7 +1119,7 @@ var app = {
 			//console.log("---------------------------------------------------------------------------------");
 			
 			$.ajax({
-				url: app.apiUrl + '/api/v3/user',
+				url: app.apiUrl + '/api/v4/user',
 				type: 'Post',
 				data: data,
 				   error: function(response){
@@ -1269,6 +1298,7 @@ var app = {
 		app.container.html('');
 		//app.container.append('<h1>תוצאות</h1><div class="dots"></div>');
 		app.pageNumber = 1;
+		app.itemsPerPage = 30;
 		app.action = 'getSearchResults';
 		app.getUsers();
 	},
@@ -1278,7 +1308,7 @@ var app = {
 		var abuseMessage = $('#abuseMessage').val();
 	
 		$.ajax({
-		   url: app.apiUrl+'/api/v3/user/abuse/'+app.reportAbuseUserId,
+		   url: app.apiUrl+'/api/v4/user/abuse/'+app.reportAbuseUserId,
 		   type: 'Post',
 		   contentType: "application/json; charset=utf-8",
 		   data: JSON.stringify({abuseMessage: abuseMessage}),
@@ -1308,7 +1338,7 @@ var app = {
 		}
 		
 		$.ajax({
-			   url: app.apiUrl + '/api/v3/contactUs',
+			   url: app.apiUrl + '/api/v4/contactUs',
 			   type: 'Post',
 			   contentType: "application/json; charset=utf-8",
 			   data: JSON.stringify({
@@ -1346,7 +1376,7 @@ var app = {
 		
 		
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/profile/'+userId,
+			url: app.apiUrl + '/api/v4/user/profile/'+userId,
 			type: 'Get',
 			   error: function(response){
 			   console.log(JSON.stringify(response));
@@ -1589,19 +1619,48 @@ var app = {
 		return line;
 	},
 	
-	getMessenger: function(){		
-		app.startLoading();		
+	getMessenger: function(){
+		
+		if(app.pageNumber == 1){
+			app.startLoading();
+		}
+		
+		app.itemsPerPage = 20;
+		
+		
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/contacts',									
+			url: app.apiUrl + '/api/v4/user/contacts/perPage:' + app.itemsPerPage + '/page:' + app.pageNumber,
+			   error: function(response){
+			   console.log(JSON.stringify(response));
+			   },
 			success: function(response){
+			   
+			   console.log(JSON.stringify(response));
 				
 				app.response = response;				
 				//if(pagesTracker.indexOf('messenger_page')!=-1){
 				//	pagesTracker.splice(pagesTracker.length-pagesTracker.indexOf('messenger_page'),pagesTracker.indexOf('messenger_page'));
 				//}
 				app.showPage('messenger_page');
-				app.container = app.currentPageWrapper.find('.chats_wrap');
-				app.container.html('');				
+			   
+			   
+			   app.container = app.currentPageWrapper.find('.chats_wrap');
+			   if(app.pageNumber == 1){
+			        app.container.html('');
+			   }
+			   
+			   if(app.currentPageId == 'messenger_page'){
+			   
+			       $('.loadingHTML').remove();
+			   
+			       app.responseItemsNumber = app.response.chatsNumber;
+			   
+     			   if(app.responseItemsNumber == 0){
+			           app.container.append('<div class="center noResults">אין הודעות</div>')
+			           return;
+			       }
+			   
+			   
 				app.template = $('#messengerTemplate').html();
 				for(var i in app.response.allChats){
 					var currentTemplate = app.template; 
@@ -1612,13 +1671,38 @@ var app = {
 					currentTemplate = currentTemplate.replace("[DATE]", chat.recentMessage.date);					
 					currentTemplate = currentTemplate.replace("[USER_ID]", chat.user.userId);
 					app.container.append(currentTemplate);
-					if(chat.newMessagesCount > 0||chat. user.isPaying == 1){
-						var currentUserNode = app.container.find(":last-child");
-						if(chat.newMessagesCount > 0)currentUserNode.find(".new_mes_count").html(chat.newMessagesCount).show();
-						if(chat.user.isPaying == 1)currentUserNode.find(".special2").show();
+					
+			        if(chat.newMessagesCount > 0 || chat.user.isPaying == 1){
+			            var currentUserNode = app.container.find(":last-child");
+						if(chat.newMessagesCount > 0)
+				             currentUserNode.find(".new_mes_count").html(chat.newMessagesCount).show();
+
+						if(chat.user.isPaying == 1)
+			                 currentUserNode.find(".special2").show();
 					}
 				}
-				app.stopLoading();
+			   
+			   
+			   //console.log(app.container.html());
+			   
+			   
+			   
+
+				if(app.responseItemsNumber == app.itemsPerPage){
+				    var loadingHTML = '<div class="loadingHTML mar_top_8">'+$('#loadingBarTemplate').html()+'</div>';
+				    $(loadingHTML).insertAfter(app.container.find('.mail_section:last-child'));
+				}
+			   //else{alert(app.responseItemsNumber +' '+app.itemsPerPage)}
+
+				app.setScrollEventHandler(1000, 2000);
+			   
+			   
+			   }
+			   else{
+			       app.pageNumber--;
+			   }
+			   
+			   app.stopLoading();
 			}
 		});
 	},
@@ -1628,7 +1712,7 @@ var app = {
 		app.chatWith = chatWith;
 		app.startLoading();
 		$.ajax({
-			url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith,
+			url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith,
 			   error:function(response){
 			   console.log(JSON.stringify(app.response));
 			   },
@@ -1731,7 +1815,7 @@ var app = {
 		if(message.length > 0){
 			$('#message').val('');			
 			$.ajax({
-				url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith,
+				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith,
 				type: 'Post',
 				contentType: "application/json; charset=utf-8",
 				error: function(response){
@@ -1741,6 +1825,7 @@ var app = {
 					message: message 
 				}),
 				success: function(response){
+				   console.log(JSON.stringify(response));
 					app.response = response;
 					var html = app.buildChat();
 					app.container.html(html);
@@ -1756,7 +1841,7 @@ var app = {
 	refreshChat: function(){
 		if(app.currentPageId == 'chat_page'){
 			$.ajax({
-				url: app.apiUrl + '/api/v3/user/chat/'+app.chatWith+'/'+app.contactCurrentReadMessagesNumber+'/refresh',
+				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith+'/'+app.contactCurrentReadMessagesNumber+'/refresh',
 				type: 'Get',
 				complete: function(response, status, jqXHR){					
 					//app.stopLoading();
@@ -1789,7 +1874,7 @@ var app = {
 		if(user != '' && pass != '' && app.currentPageId != 'login_page' && app.currentPageId != 'register_page' && app.currentPageId != 'recovery_page'){
 			
 			checkNewMessagesRequest = $.ajax({
-			url: app.apiUrl + '/api/v3/user/newMessagesCount',
+			url: app.apiUrl + '/api/v4/user/newMessagesCount',
 			type: 'Get',
 			complete: function(response, status, jqXHR){					
 				//app.stopLoading();
@@ -1852,13 +1937,13 @@ var app = {
 	},
 	
 	deleteImage: function(){
-		app.requestUrl = app.apiUrl + '/api/v3/user/images/delete/' + app.imageId,
+		app.requestUrl = app.apiUrl + '/api/v4/user/images/delete/' + app.imageId,
 		app.requestMethod = 'Post';
 		app.getUserImages();
 	},
 	
 	displayUserImages: function(){
-		app.requestUrl = app.apiUrl + '/api/v3/user/images';
+		app.requestUrl = app.apiUrl + '/api/v4/user/images';
 		app.requestMethod = 'Get';
 		app.getUserImages();
 	},
@@ -1949,7 +2034,7 @@ var app = {
         var ft = new FileTransfer();
         ft.upload(
         	imageURI, 
-        	encodeURI("http://m.richdate.co.il/api/v3/user/image"), 
+        	encodeURI("http://m.richdate.co.il/api/v4/user/image"), 
         	app.uploadSuccess, 
         	app.uploadFailure,
 	        options
@@ -2006,7 +2091,7 @@ var app = {
 	
 	getEditProfile: function(){
 	$.ajax({
-		   url: app.apiUrl + '/api/v3/user/data',
+		   url: app.apiUrl + '/api/v4/user/data',
 		   success: function(response){
 		   console.log(JSON.stringify(response));
 		   user = response.user;
@@ -2125,7 +2210,7 @@ saveProf: function (el,tag){
 	
 	
 	$.ajax({
-		   url: app.apiUrl + '/api/v3/user/data',
+		   url: app.apiUrl + '/api/v4/user/data',
 		   //dataType: 'json',
 		   type: 'post',
 		   data: JSON.stringify({name:name,val:val}),
@@ -2247,7 +2332,7 @@ editProf: function (el){
 		
 		
 		$.ajax({
-		    url: app.apiUrl + '/api/v3/list/' + entity,
+		    url: app.apiUrl + '/api/v4/list/' + entity,
 		    success: function(list, status, xhr){
 			   //console.log(JSON.stringify(list));
 			   var html = '';

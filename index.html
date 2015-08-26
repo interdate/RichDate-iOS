@@ -160,11 +160,11 @@
 						</div>
 						
 						<div class="mb_wrap">
-							<div id="friends_online" onclick="app.getOnlineNow();"><div class="text">חברים אונליין</div></div>
+							<div id="friends_online" onclick="app.startLoading();app.getOnlineNow();"><div class="text">חברים אונליין</div></div>
 						</div>
 						
 						<div class="mb_wrap">
-							<div id="mail_box" onclick="app.getMessenger();"><div class="text">תיבת הודעות</div><div id="new_mes_count"></div></div>
+							<div id="mail_box" onclick="app.pageNumber = 1; app.getMessenger();"><div class="text">תיבת הודעות</div><div id="new_mes_count"></div></div>
 						</div>
 						
 						<div class="clear"></div>
