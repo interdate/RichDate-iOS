@@ -100,7 +100,7 @@ IAP.onPurchase = function (transactionId, productId) {
 		
 		
 	$.ajax({
-		url: app.apiUrl + '/api/v2/user/subscription/monthsNumber:'+monthsNumber,
+		url: app.apiUrl + '/api/v4/user/subscription/monthsNumber:'+monthsNumber,
 		type: 'Post',
 		success: function(data, status){
 			//alert(JSON.stringify(data));
