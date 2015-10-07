@@ -35,6 +35,52 @@ a{
 	z-index:1000;
 }
 
+#hCenter{
+	margin: 0px auto 0px auto;
+	width: 155px;
+	height: 70px;
+}
+
+#logo{
+	width:80px;
+	height:70px;
+	background: url("../images/logo.png") no-repeat top center;
+	background-size: 100% 55px;
+	float: left;
+}
+
+#likesNotifications{
+	float: left;
+	background: url("../images/swiper/notif_bg1.png") no-repeat center center;
+	background-size: 100%;
+	/*
+	 position: absolute;
+	 left: 85px;
+	 top: 0px;
+	 */
+	width: 70px;
+	height: 70px;
+	position: relative;
+	margin-top: 5px;
+}
+
+#likesCount{
+	background: url("../images/swiper/noti.png") no-repeat center center;
+	background-size: 80%;
+	position: absolute;
+	left: -5px;
+	bottom: -4px;
+	width: 28px;
+	height: 28px;
+	font-size: 11px;
+	color: #fff;
+	padding-top: 12px;
+	text-align: center;
+	
+}
+
+
+
 #sign_up{
 	display:none;
 	position:absolute;
@@ -58,8 +104,9 @@ a{
 
 }
 
+
+/*
 #logo{
-	/*float:left;*/
 	width:121px;
 	height:70px;
 	background: url("../images/logo.png") no-repeat center center;
@@ -69,6 +116,8 @@ a{
 	margin-left:-60.5px;
 	background-size:100%;
 }
+*/
+
 
 #logout{
 	position:absolute;
@@ -471,7 +520,7 @@ a{
 }
 
 
-#friends_online, #search_friends, #profile, #mail_box, #looked_me, #looked_them,  #contacted_them, #favorites, #fav_me, #update_profile{
+#friends_online, #search_friends, #profile, #mail_box, #looked_me, #doLikes, #looked_them,  #contacted_them, #favorites, #fav_me, #update_profile{
 	float:right;
 	width:100%;
 	height:100%;
@@ -534,6 +583,10 @@ a{
 	background-size: 45%;
 }
 
+#doLikes{
+	background:url("../images/do_likes_button.png") no-repeat 50% 30%;
+	background-size: 80%;
+}
 
 
 
@@ -834,10 +887,26 @@ a .mail_section{
 	clear:both;
 }
 
+.isRead{
+	background: #bababa;
+}
+
+.bingo{
+	position: absolute;
+	bottom: 5px;
+	left: 5px;
+	width: 50px;
+	height: 25px;
+	background-image: url("../images/swiper/bingo.png");
+	background-repeat: no-repeat;
+	background-size: 80%;
+	background-position: bottom;
+}
+
 .mail_section .txt{	
 	height:60px;
 	float:right;	
-	color:#949494;
+	color:#666;
 	font-size:12px;
 	margin:7px 65px 7px 7px;
 	overflow: hidden;
@@ -865,7 +934,7 @@ a .mail_section{
 	position: absolute;
 	top:7px;
 	left:7px;
-	color:#cacaca;
+	color:#888;
 	font-size: 12px;	
 }
 
@@ -1617,6 +1686,8 @@ a .mail_section{
 #report_abuse_page,
 #edit_profile_page,
 #contact_us_page,
+#do_likes_page,
+#likes_notifications_page,
 .pic_wrap,
 .appTemplates,
 .new_mes_count, 
@@ -1925,6 +1996,208 @@ margin-left:-20%;
 	height: 150px;
 	width: 100%;
 }
+
+
+
+
+
+#do_likes_page{
+	width: 100%;
+	height: 500px;
+	position: relative;
+	margin-top: 15px;
+	background: #000;
+}
+
+.swiper-container {
+	position: absolute;
+	top: 0px;
+	right:0px;
+	
+	width: 100%;
+	height: 100%;
+}
+
+
+.swiper-slide .cont{
+	width: 100%;
+	height: 100%;
+	background-position: center;
+	background-size: contain;
+	background-color: #000;
+	background-repeat: no-repeat;
+	position: relative;
+}
+
+#do_likes_page .toolbar{
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	width: 100%;
+	height: 100px;
+	background: #bcbcbc;
+	z-index: 9999999999;
+}
+
+#do_likes_page .toolbar .box{
+	float: left;
+	width: 33%;
+	height: 100px;
+}
+
+#do_likes_page .toolbar .box .icon{
+	width: 65px;
+	height: 100%;
+	margin: 0px auto 0px auto;
+}
+
+
+#do_likes_page .toolbar .box .icon.like{
+	background: url('../images/swiper/like.png') no-repeat center center;
+}
+
+#do_likes_page .toolbar .box .icon.chat{
+	background: url('../images/swiper/mess.png') no-repeat center center;
+}
+
+#do_likes_page .toolbar .box .icon.unlike{
+	background: url('../images/swiper/unlike.png') no-repeat center center;
+}
+
+#do_likes_page .icon.close{
+	position: absolute;
+	right: 20px;
+	top: 20px;
+	background: url('../images/swiper/icon_cancel.png') no-repeat;
+	background-size: 100%;
+	width: 32px;
+	height: 32px;
+	z-index: 9999999999;
+}
+
+#do_likes_page .nickname{
+	position: absolute;
+	right: 0px;
+	top: -5px;
+	margin: 15px;
+	padding: 5px 10px 5px 10px;
+	color: #fff;
+	background: #bcbcbc url('../images/swiper/bg_trasparent.png');
+	z-index: 9999999999;
+	
+}
+
+
+
+#bingo_page{
+	height:700px;
+}
+
+
+.bingoWrapper{
+	width: 100%;
+	height: 700px;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	background: #000;
+	opacity: .7;
+	z-index: 999999999999;
+	
+}
+
+.bingoWrapper .close{
+	position:absolute;
+	top: 20px;
+	right: 20px;
+	background: url('../images/swiper/close.png') no-repeat;
+	background-size:  100% 100%;
+	width: 37px;
+	height: 37px;
+}
+
+.bingoWrapper .logo{
+	width: 205px;
+	height: 105px;
+	margin: 75px auto 5px auto;
+	background: url('../images/swiper/bingo.png') no-repeat;
+	
+}
+
+.bingoWrapper .imagesWrapper{
+	width: 310px;
+	margin: 0px auto 0px auto;
+	
+}
+
+
+.bingoWrapper .imageCont{
+	float: right;
+	width: 120px;
+	height: 120px;
+	background: black;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+	-moz-border-radius: 50px;
+	-webkit-border-radius: 50px;
+	border-radius: 50%;
+	border: 6px solid #fff;
+	
+	
+}
+
+
+.bingoWrapper .plus{
+	float: right;
+	width: 41px;
+	height: 132px;
+	background: url('../images/swiper/plus.png') no-repeat center center;
+	margin-left:5px;
+}
+
+
+.bingoWrapper .txt{
+	width: 100%;
+	font-size: 17px;
+	color: #fff;
+	text-align: center;
+	margin-top:20px;
+}
+
+
+.bingoWrapper .chat, .bingoWrapper .ignore{
+	text-align: center;
+	color: #fff;
+	font-weight: bold;
+	line-height: 50px;
+}
+
+
+.bingoWrapper .chat{
+	margin: 20px auto 0px auto;
+	background: url('../images/swiper/chatSplash.png') no-repeat;
+	width: 225px;
+	height: 57px;
+	padding-left: 50px;
+	box-sizing: border-box;
+	
+}
+
+.bingoWrapper .ignore{
+	margin: 20px auto 0px auto;
+	background: url('../images/swiper/ignoreSplash.png') no-repeat;
+	width: 225px;
+	height: 57px;
+}
+
+
+#likes_notifications_page{
+	color: #fff;
+	text-shadow: none;
+}
+
+
 
 
 

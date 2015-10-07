@@ -48,6 +48,7 @@ var pushNotification;
 getUsersRequest = '';
 checkNewMessagesRequest = '';
 newMessages = '';
+checkBingo = '';
 
 
 
@@ -90,6 +91,11 @@ var app = {
 	contactCurrentReadMessagesNumber : 0,
 	
 	EULA: false,
+	
+	swiper: null,
+	bingoIsActive: false,
+	bingos: [],
+	newNotificationsCount: 0,
 	
 		
 	init: function(){
@@ -163,7 +169,7 @@ var app = {
 		app.startLoading();
 		
 		$(window).unbind('scroll');
-		clearTimeout(newMesssages);
+		clearTimeout(newMessages);
 		
 		if(checkNewMessagesRequest != ''){
 			checkNewMessagesRequest.abort();
@@ -213,6 +219,7 @@ var app = {
 			$('#logout').hide();
 			$('#contact').hide();
 			$('#sign_up').show();
+			$('#likesNotifications').hide();
 			//app.printUsers();
 			app.currentPageId = 'login_page';
 			app.currentPageWrapper = $('#'+app.currentPageId);
@@ -223,6 +230,7 @@ var app = {
 			$('#back').hide();
 			$('#logout').show();
 			$('#sign_up').hide();
+			$('#likesNotifications').show();
 			//$('#contact').show();	
 			if(app.logged == 'nopay'){
 				app.currentPageId = 'main_page';
@@ -279,7 +287,9 @@ var app = {
 	loggedUserInit: function(){
 		app.searchFuncsMainCall = true;
 		app.setBannerDestination();
-		app.checkNewMessages();					
+		app.checkNewMessages();
+		app.checkBingo();
+		
 		//app.pushNotificationInit();
 		app.sendUserPosition();
 	},
@@ -416,6 +426,7 @@ var app = {
 			   
 					window.localStorage.setItem("userId", data.userId);
 					window.localStorage.setItem("userInput", user);
+			        app.UIHandler();
 					app.loggedUserInit();
 					//document.removeEventListener("backbutton", app.back, false);
 				    window.scrollTo(0, 0);
@@ -1881,7 +1892,7 @@ var app = {
 			},
 			success: function(response){
 				//app.response = response;
-				//alert(app.response.newMessagesCount);
+				console.log(JSON.stringify(response));
 				if(response.newMessagesCount > 0){
 					var count = response.newMessagesCount;
 					//var width = $(document).width();				
@@ -1897,7 +1908,19 @@ var app = {
 					$('.new_mes').hide();
 					$('#main_page').css({'padding-top':'0px'});
 				}
-				newMesssages = setTimeout(app.checkNewMessages, 10000);
+											 
+				if(response.newNotificationsCount > 0){
+					app.newNotificationsCount = response.newNotificationsCount;
+					if(app.logged === true && app.currentPageId != 'login_page' && app.currentPageId != 'register_page' && app.currentPageId != 'recovery_page'){
+						$('#likesCount').html(app.newNotificationsCount).show();
+					}
+				}
+				else{
+					app.newNotificationsCount = 0;
+					$('#likesCount').hide();
+				}
+											 
+				newMessages = setTimeout(app.checkNewMessages, 10000);
 			}
 		});
 			
@@ -2409,6 +2432,321 @@ editProf: function (el){
 		return html;
 	},
 	
+	
+	
+
+	
+getUsersForLikes: function(supposedToBeLikedUserId, notifId){
+	
+	app.startLoading();
+	
+	if(!supposedToBeLikedUserId){
+		supposedToBeLikedUserId = 0;
+	}
+	
+	if(!notifId){
+		notifId = 0;
+	}
+	
+	var url = app.apiUrl + '/api/v4/users/forLikes/' + supposedToBeLikedUserId + '/' + notifId;
+	
+	$.ajax({
+		   url: url,
+		   type: 'Get',
+		   error: function(error){
+		   //alert("ERROR:" + JSON.stringify(error));
+		   },
+		   success: function(response){
+		   
+		   console.log(response.users.itemsNumber);
+		   
+		   if(response.userHasNoMainImage){
+		   app.alert('כדי להיכנס לזירה של ריצ׳דייט עליך לעדכן תמונה.');
+		   app.displayUserImages();
+		   }
+		   
+		   
+		   app.showPage('do_likes_page');
+		   if(response.users.itemsNumber > 0){
+					var userId = window.localStorage.getItem("userId");
+					var html = '';
+		   
+					for(var i in response.users.items){
+		   
+		   var user = response.users.items[i];
+		   
+		   html = html + '<div class="swiper-slide"><div id="' + user.id + '" class="cont" style="background-image: url('
+		   + response.users.imagesStoragePath
+		   + '/'
+		   + user.imageId
+		   + '.'
+		   + response.users.imagesExtension
+		   + ')"><div class="nickname" onclick="app.getUserProfile(' + user.id + ')">' + user.nickName + '</div></div></div>';
+					}
+		   
+					var wrapper = $('.swiper-wrapper');
+		            wrapper.html(html);
+					app.initSwiper();
+					app.showPage('do_likes_page');
+		   }
+		   
+		   
+		   }
+	    });
+},
+	
+	
+initSwiper: function(){
+	
+	if(app.swiper != null){
+		app.swiper.destroy();
+	}
+	
+	
+	app.swiper = new Swiper ('.swiper-container', {
+								// Optional parameters
+								direction: 'horizontal',
+								//spaceBetween: 50,
+								loop: true,
+								speed: 100,
+							 prevButton: '.unlike.icon'
+							 
+							 // If we need pagination
+							 //pagination: '.swiper-pagination',
+							 
+							 // Navigation arrows
+							 //nextButton: '.swiper-button-next',
+							 //prevButton: '.swiper-button-prev',
+							 
+							 // And if we need scrollbar
+							 //scrollbar: '.swiper-scrollbar',
+        });
+	
+},
+	
+	
+doLike: function(){
+	
+	var userId = $('.swiper-slide-active .cont').attr("id");
+	
+	$.ajax({
+		   url: app.apiUrl + '/api/v4/user/like/' + userId,
+		   type: 'Post',
+		   error: function(error){
+		   console.log("ERROR: " + JSON.stringify(error));
+		   },
+		   success: function(response){
+		   console.log("SUCCESS: " + JSON.stringify(response));
+		   app.swiper.slidePrev();
+		   $('#' + userId).parents('.swiper-slide').remove();
+		   app.checkBingo();
+		   }
+		   });
+},
+	
+getChatWith: function(){
+	var chatWith = $('.swiper-slide-active .cont').attr("id");
+	var userNick = $('.swiper-slide-active .cont .nickname').text();
+	console.log($('.swiper-container').html());
+	app.getChat(chatWith, userNick);
+},
+	
+	
+getLikesNotifications: function(){
+	
+	app.startLoading();
+	
+	$.ajax({
+		   url: app.apiUrl + '/api/v4/user/likes/notifications',
+		   type: 'Get',
+		   error: function(error){
+		   console.log("ERROR: " + JSON.stringify(error));
+		   },
+		   success: function(response){
+		   //console.log("SUCCESS: " + JSON.stringify(response));
+		   app.showPage('likes_notifications_page');
+		   
+		   if(response.likesNotifications.itemsNumber > 0){
+		   var template = $('#likeNotificationTemplate').html();
+		   var html = '';
+		   
+		   for(var i in response.likesNotifications.items){
+		   var currentTemplate = template;
+		   var notification = response.likesNotifications.items[i];
+		   
+		   notification.nickName = notification.nickName.replace(/'/g, "׳");
+																 
+																 imageUrl = response.likesNotifications.imagesStoragePath
+																 + '/'
+																 + notification.imageId
+																 + '.'
+																 + response.likesNotifications.imagesExtension
+																 ;
+																 
+																 var isReadClass = (notification.isRead == 1) ? 'isRead' : '';
+																 var bingoClass = (notification.bingo == 1) ? 'bingo' : '';
+																 var func = (notification.bingo == 1)
+																 ? "app.setUserNotificationAsRead(" + notification.id + ", this);app.getChat('" +  notification.userId  + "','" + notification.nickName + "');"
+																 : "app.getUsersForLikes('" + notification.userId  + "','" + notification.id  + "')"
+																 ;
+																 
+																 currentTemplate = currentTemplate.replace("[IMAGE]", imageUrl);
+																 currentTemplate = currentTemplate.replace(/\[USERNICK\]/g,notification.nickName);
+																 currentTemplate = currentTemplate.replace("[FUNCTION]", func);
+																 currentTemplate = currentTemplate.replace("[TEXT]",notification.template.replace("[USERNICK]", notification.nickName));
+																 currentTemplate = currentTemplate.replace("[DATE]", notification.date);
+																 currentTemplate = currentTemplate.replace("[USER_ID]", notification.userId);
+																 currentTemplate = currentTemplate.replace("[IS_READ_CLASS]", isReadClass);
+																 currentTemplate = currentTemplate.replace("[BINGO_CLASS]", bingoClass);
+																 
+																 html = html + currentTemplate;
+																	}
+																	
+																	console.log("HTML: " + html);
+																	
+																	app.currentPageWrapper.find('.notifications_wrap').html(html);
+																	
+																 }
+																 
+																 }
+																 });
+		   },
+		   
+		   checkBingo: function(){
+		   
+		   if(app.currentPageId != 'login_page' && app.currentPageId != 'register_page' && app.currentPageId != 'recovery_page'){
+		   
+		   
+		   if(checkBingo != ''){
+		   checkBingo.abort();
+		   }
+		   
+		   checkBingo = $.ajax({
+							   url: app.apiUrl + '/api/v4/user/bingo',
+							   type: 'Get',
+							   error: function(error){
+        		console.log("ERROR: " + JSON.stringify(error));
+							   },
+							   success: function(response){
+							   
+							   if(app.currentPageId != 'login_page' && app.currentPageId != 'register_page' && app.currentPageId != 'recovery_page'){
+							   
+        		console.log("SUCCESS: " + JSON.stringify(response));
+        		if(response.bingo.itemsNumber > 0){
+							   for(var i = 0; i < response.bingo.itemsNumber; i++){
+							   var bingo = response.bingo.items[i];
+							   
+							   if(!app.inBingosArray(bingo)){
+							   app.bingos.push(bingo);
+							   }
+							   }
+							   
+							   if(!app.bingoIsActive && app.currentPageId != 'chat_page'){
+							   app.splashBingo(response);
+							   }
+							   
+        		}
+							   
+        		setTimeout(app.checkBingo, 10000);
+							   
+							   
+							   }
+							   
+							   }
+							   });
+		   
+		   }
+		   
+		   },
+		   
+		   splashBingo: function(response){
+		   //alert(app.bingos.length);
+		   for(var i in app.bingos){
+		   if(typeof(app.bingos[i]) !== "undefined" ){
+		   //alert("Bingo " + i + ": " + JSON.stringify(app.bingos[i]));
+		   var bingo = app.bingos[i];
+		   var template = $('#bingoTemplate').html();
+		   
+		   userImageUrlTemplate = response.bingo.imagesStoragePath
+		   + '/'
+		   + '[IMAGE_ID]'
+		   + '.'
+		   + response.bingo.imagesExtension
+		   ;
+		   
+		   var userImageUrl_1 = userImageUrlTemplate.replace('[IMAGE_ID]', bingo.userImageId_1);
+		   var userImageUrl_2 = userImageUrlTemplate.replace('[IMAGE_ID]', bingo.userImageId_2);
+		   
+		   template = template.replace("[USER_IMAGE_URL_1]", userImageUrl_1);
+		   template = template.replace("[USER_IMAGE_URL_2]", userImageUrl_2);
+		   template = template.replace("[USER_ID]", bingo.userId);
+		   template = template.replace(/\[USERNICK\]/g, bingo.nickName);
+		   
+		   $('#bingo_page').css({"background":"url('" + userImageUrl_2 + "') no-repeat center center", "background-size":"cover"}).html(template);
+		   app.showPage('bingo_page');
+		   
+		   app.bingoIsActive = true;
+		   app.setBingoAsSplashed(bingo, i);
+		   break;
+		   }
+		   }
+		   
+		   
+		   
+		   
+		   
+		   },
+		   
+		   setBingoAsSplashed: function(bingo, i){
+		   
+		   var data = JSON.stringify(bingo);
+		   
+		   $.ajax({
+				  url: app.apiUrl + '/api/v4/user/bingo/splashed',
+				  type: 'Post',
+				  data: data,
+				  error: function(error){
+				  console.log("ERROR: " + JSON.stringify(error));
+				  },
+				  success: function(response){
+				  console.log(JSON.stringify(response));
+				  if(response.success){
+				  app.bingos.splice(i, 1);
+				  }
+				  }
+				  });
+		   },
+		   
+		   
+		   inBingosArray: function(bingo){
+		   for(var i in app.bingos){
+		   if(app.bingos[i].id === bingo.id){
+		   return true;
+		   }
+		   }
+		   return false;
+		   },
+		   
+		   
+		   setUserNotificationAsRead: function(notifId, clickedObj){
+		   $.ajax({
+				  url: app.apiUrl + '/api/v4/user/notification/' + notifId + '/read',
+				  type: 'Post',
+				  error: function(error){
+				  console.log("ERROR: " + JSON.stringify(error));
+				  },
+				  success: function(response){
+				  console.log(JSON.stringify(response));
+				  $(clickedObj).addClass("isRead");
+				  }
+				  });
+		   },
+		   
+	
+	
+	
+	
+	
 		
 	dump: function(obj) {
 	    var out = '';
@@ -2416,7 +2754,7 @@ editProf: function (el){
 	        out += i + ": " + obj[i] + "\n";
 	    }
 	    alert(out);
-	}	
+	}
 	
 		
 };

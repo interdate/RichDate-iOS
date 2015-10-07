@@ -1,7 +1,7 @@
 
 var IAP = {
 //list: [ 'richdate.oneMonth', 'richdate.threeMonths', 'richdate.sixMonths', 'richdate.oneYear'],
-list: [ 'richdate.oneMonth'],
+list: [ 'richdate.oneMonthNAR', 'richdate.threeMonthsNAR'],
 products: {}
 };
 var localStorage = window.localStorage || {};
@@ -50,19 +50,25 @@ IAP.render = function () {
 		console.log(IAP.products);
 		
 		var template = $('#subscrItemTemplate').html();
-		
+		$('#subscrList').html('');
 		for (var id in IAP.products) {
 			var currentTemplate = template;
 			var product = IAP.products[id];
 			//currentTemplate = currentTemplate.replace("[TITLE]",product.title);
-			currentTemplate = currentTemplate.replace("[TITLE]","מנוי חודשי מתחדש ברייצ'דייט");
+			if(product.id == 'richdate.oneMonthNAR')
+    			currentTemplate = currentTemplate.replace("[TITLE]","מנוי חודשי בריצ'דייט");
+			else if(product.id == 'richdate.threeMonthsNAR')
+				currentTemplate = currentTemplate.replace("[TITLE]","מנוי לשלושה חודשים בריצ'דייט");
+			
 			currentTemplate = currentTemplate.replace("[PRICE]",product.price);
 			currentTemplate = currentTemplate.replace("[PURCHASE_ID]",product.id);
+			
+			$('#subscrList').append(currentTemplate);
 			
 		}
 		
 		
-		$('#subscrList').html(currentTemplate);
+		
 		
 		//alert($('#subscrList').html());
 		
@@ -80,11 +86,11 @@ IAP.onPurchase = function (transactionId, productId) {
 	if(transactionId > 0){
 		
 		switch(productId){
-			case 'richdate.oneMonth':
+			case 'richdate.oneMonthNAR':
 				var monthsNumber = 1;
 				break;
 				
-			case 'richdate.threeMonths':
+			case 'richdate.threeMonthsNAR':
 				var monthsNumber = 3;
 				break;
 				
@@ -104,6 +110,7 @@ IAP.onPurchase = function (transactionId, productId) {
 		type: 'Post',
 		success: function(data, status){
 			//alert(JSON.stringify(data));
+		   app.stopLoading();
 		   app.alert('Congratulations on your purchase of a paid subscription to richdate.co.il');
 		   app.chooseMainPage();
 			   
@@ -157,5 +164,5 @@ IAP.restore = function () {
 };
 
 IAP.fullVersion = function () {
-	return localStorage['storekit.richdate.oneMonth'];
+	return localStorage['storekit.richdate.oneMonthNAR'];
 };
