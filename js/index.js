@@ -2481,7 +2481,7 @@ getUsersForLikes: function(supposedToBeLikedUserId, notifId){
 		   + user.imageId
 		   + '.'
 		   + response.users.imagesExtension
-		   + ')"><div class="nickname" onclick="app.getUserProfile(' + user.id + ')">' + user.nickName + '</div></div></div>';
+		   + ')"><div class="nickname" onclick="app.getUserProfile(' + user.id + ')">' + user.nickName + ', ' + user.age + '</div></div></div>';
 					}
 		   
 					var wrapper = $('.swiper-wrapper');

@@ -164,5 +164,5 @@ IAP.restore = function () {
 };
 
 IAP.fullVersion = function () {
-	return localStorage['storekit.richdate.oneMonthNAR'];
+	return localStorage['storekit.richdate.oneMonthNAR','storekit.richdate.threeMonthsNAR'];
 };
