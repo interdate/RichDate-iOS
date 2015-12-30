@@ -1130,7 +1130,7 @@ var app = {
 			//console.log("---------------------------------------------------------------------------------");
 			
 			$.ajax({
-				url: app.apiUrl + '/api/v4/user',
+				url: app.apiUrl + '/api/v4/user1',
 				type: 'Post',
 				data: data,
 				   error: function(response){
@@ -1169,7 +1169,13 @@ var app = {
 		if(data){
 			object = JSON.parse(data);
 			if(object.userGender == 1){
-				app.container.find('.regInfo').append('. חשבונך טרם הופעל. אנא בדוק את הדוא"ל שלך לצורך הפעלת החשבון.');
+				// app.container.find('.regInfo').append('. חשבונך טרם הופעל. אנא בדוק את הדוא"ל שלך לצורך הפעלת החשבון.');
+				if(typeof app.response.text !== 'undefined'){
+					app.container.find('.regInfo').prepend(app.response.text); /* '. חשבונך טרם הופעל. אנא בדוק את הדוא"ל שלך לצורך הפעלת החשבון.' */
+				}
+				if(typeof app.response.url !== 'undefined'){
+					window.open(app.response.url, '_blank', 'location=yes');
+				}
 			}
 		}
 		
