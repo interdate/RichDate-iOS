@@ -786,7 +786,7 @@
 						<button class="take_a_photo" data-theme="a" onclick="app.capturePhoto(app.pictureSource.CAMERA, app.destinationType.FILE_URI);">הפעל מצלמה</button>
 
 						<button class="choose_from_library" data-theme="a" onclick="app.capturePhoto(app.pictureSource.PHOTOLIBRARY, app.destinationType.FILE_URI);">תמונה מגלריה</button>
-						<button class="continue" data-theme="a" onclick="app.chooseMainPage();">המשך</button>
+						<div class="continue" onclick="app.chooseMainPage();"><button data-theme="a">המשך</button></div>
 					</div>
 				</div>
 			</div>
@@ -967,7 +967,9 @@
 								<div class="regInput"><input type="text" name="userCity" id="userCity" maxlength="50" data-role="none" /></div>
 								<div class="clear"></div>
 								
-								<div class="regTxt lineHeight_50" id="cities_wrap">טלפון</div>
+								<div class="regTxt mar_top_8" id="cities_wrap">טלפון
+                                <span id="activate_code_label">לקבלת קוד הפעלה</span>
+                                </div>
 								<div class="regInput"><input type="text" name="userPhone" id="userPhone" maxlength="50" data-role="none" /></div>
 								<div class="clear"></div>
 								
@@ -1074,6 +1076,7 @@
 			<div id="userProfileButtonsTemplate">
 				<button onclick="app.getChat([USER_ID],'[USERNICK]');" data-theme="a">שליחת הודעה</button>
 				<div class="clear"></div>
+                <button onclick="app.addToFavorites([USER_ID]);" data-theme="a">הוספה למועדפים</button>
 				<br />
 			</div>
 			<!-- END User Profile Buttons Template -->
@@ -1082,6 +1085,7 @@
 			<div id="userProfileButtonsTemplate_2">
 				<button onclick="app.showPage('report_abuse_page')" data-theme="a">דווחו למערכת על כרטיס לא תקין</button>
 				<div class="clear"></div>
+                <button onclick="app.addToBlackList([USER_ID]);" data-theme="a">הוספה לרשימה שחורה</button>
 				<br />
 			</div>
 			<!-- END User Profile Buttons Template 2-->

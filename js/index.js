@@ -137,7 +137,13 @@ var app = {
 					app.showPage('login_page');
 					//app.printUsers();
 					//app.alert('הכנסת מידע שגוי, אנא נסה שנית');
-					app.alert(response.responseText.split('{')[0]);
+					var resp = JSON.parse('{' + response.responseText.split('{')[1]);
+					var url = false;
+					if(typeof resp.url != 'undefined'){
+						url = resp.url;
+					}
+					app.alert(response.responseText.split('{')[0], url);
+					
 					
 				}
 				
@@ -155,10 +161,15 @@ var app = {
 		});
 	},
 	
-	alert: function(message){
+	alert: function(message, url){
 		navigator.notification.alert(
-			 message,
-			 function(){},
+			message,
+			function(){
+				if(typeof url != 'undefined' && url != false){
+					window.open(url, '_blank', 'location=yes');
+				}
+				return false;
+			},
 			 'Notification',
 			 'Ok'
 		);
@@ -1134,11 +1145,11 @@ var app = {
 				type: 'Post',
 				data: data,
 				   error: function(response){
-						//console.log("ERROR: " + JSON.stringify(response));
+						console.log("ERROR: " + JSON.stringify(response));
 				   },
 				success: function(response){
 					app.response = response;
-					//console.log("SUCCESS: " + JSON.stringify(app.response));
+					console.log("SUCCESS: " + JSON.stringify(app.response));
 					if(app.response.result > 0){
 						var user = app.container.find("#userEmail").val(); 
 						var pass = app.container.find("#userPass").val();						
@@ -1148,7 +1159,7 @@ var app = {
 						app.ajaxSetup();
 						app.getRegStep(data);
 					}
-					else{
+					else if(app.response.err.length > 0){
 						app.alert(app.response.err);
 					}
 				   
@@ -1174,7 +1185,8 @@ var app = {
 					app.container.find('.regInfo').prepend(app.response.text); /* '. חשבונך טרם הופעל. אנא בדוק את הדוא"ל שלך לצורך הפעלת החשבון.' */
 				}
 				if(typeof app.response.url !== 'undefined'){
-					window.open(app.response.url, '_blank', 'location=yes');
+					//window.open(app.response.url, '_blank', 'location=yes');
+					app.container.find('.continue').attr("onclick", app.response.url);
 				}
 			}
 		}
@@ -1289,6 +1301,19 @@ var app = {
 			app.alert('עיר שגויה');
 			return false;
 		}
+        
+        var gender = $('#userGender').val();
+        if(gender == 1){
+            var phoneLen = app.container.find('#userPhone').val().length;
+            if(phoneLen < 10){
+                app.alert('טלפון קצר מדי');
+                return false;
+            }
+            if(phoneLen > 12){
+                app.alert('טלפון שגוי');
+                return false;
+            }
+        }
 		
 		if(app.container.find('#aboutMe').val().length < 10){
 			app.alert('על עצמי שגוי (אמור להיות 10 סימנים לפחות)');
@@ -1375,6 +1400,51 @@ var app = {
 			   });
 	},
 	
+    
+    addToFavorites: function(userId){
+        $.ajax({
+           url: app.apiUrl+'/api/v4/user/favorites/' + userId,
+           type: 'Post',
+           contentType: "application/json; charset=utf-8",
+           error: function(response){
+               //alert(JSON.stringify(response));
+           },
+           success: function(response, status, xhr){
+               if(response.success){
+                   app.alert('משתמש הוסף למועדפים');
+               }
+               else{
+                   app.alert('משתמש כבר קיים במועדפים');
+               }
+           }
+        });
+    },
+    
+    addToBlackList: function(userId){
+        $.ajax({
+           url: app.apiUrl+'/api/v4/user/blacklist/' + userId,
+           type: 'Post',
+           contentType: "application/json; charset=utf-8",
+           error: function(response){
+               //alert(JSON.stringify(response));
+           },
+           success: function(response, status, xhr){
+           
+               //alert(JSON.stringify(response));
+               //return;
+           
+               if(response.success){
+                    app.alert('משתמש הוסף לרשימה שחורה');
+               }
+               else{
+                    app.alert('משתמש כבר קיים ברשימה שחורה');
+               }
+           }
+        });
+    },
+    
+    
+
 
 	
 	
@@ -1501,18 +1571,19 @@ var app = {
 				app.profileGroupTemplate = $('#userProfileGroupTemplate').html();
 				app.profileLineTemplate = $('#userProfileLineTemplate').html();
 				app.profileLineTemplate2 = $('#userProfileLineTemplate2').html();
-				
+		/*
 				
 				var profileButtonsTemplate = $('#userProfileButtonsTemplate').html();
 			    var profileButtonsTemplate_2 = $('#userProfileButtonsTemplate_2').html();
 			    profileButtonsTemplate = profileButtonsTemplate.replace(/\[USERNICK\]/g,user.nickName);
 			    profileButtonsTemplate = profileButtonsTemplate.replace("[USER_ID]", user.userId);
-				
+	*/
 			    if(user.userId != window.localStorage.getItem('userId')){
 				    var profileButtonsTemplate = $('#userProfileButtonsTemplate').html();
 				    var profileButtonsTemplate_2 = $('#userProfileButtonsTemplate_2').html();
 				    profileButtonsTemplate = profileButtonsTemplate.replace(/\[USERNICK\]/g,user.nickName);
-				    profileButtonsTemplate = profileButtonsTemplate.replace("[USER_ID]", user.userId);
+                    profileButtonsTemplate = profileButtonsTemplate.replace(/\[USER_ID\]/g, user.userId);
+				    profileButtonsTemplate_2 = profileButtonsTemplate_2.replace(/\[USER_ID\]/g, user.userId);
 			    }
 			    else{
 				    var profileButtonsTemplate = '';
@@ -2340,6 +2411,16 @@ editProf: function (el){
 		app.getList('smoking');
 		app.getList('drinking');
 		app.getRegions();
+        
+        $('#userGender').change(function(){
+            //console.log($(this).val());
+            if($(this).val() == 1){
+                $('#activate_code_label').show();
+            }
+            else{
+                $('#activate_code_label').hide();
+            }
+        });
 	},
 	
 
