@@ -2640,6 +2640,11 @@ getChatWith: function(){
 	
 	
 getLikesNotifications: function(){
+    
+    
+    if(app.logged == 'nopay'){
+        return;
+    }
 	
 	app.startLoading();
 	
