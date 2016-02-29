@@ -96,6 +96,7 @@ var app = {
 	bingoIsActive: false,
 	bingos: [],
 	newNotificationsCount: 0,
+    apnDeviceId: '',
 	
 		
 	init: function(){
@@ -301,7 +302,7 @@ var app = {
 		app.checkNewMessages();
 		app.checkBingo();
 		
-		//app.pushNotificationInit();
+		app.pushNotificationInit();
 		app.sendUserPosition();
 	},
 	
@@ -481,119 +482,142 @@ var app = {
 	contact: function(){		
 		//window.location.href = 'http://dating4disabled.com/contact.asp';		
 	},
-		
-	pushNotificationInit: function(){
 
-		try{ 
-        	pushNotification = window.plugins.pushNotification;
-        	if (device.platform == 'android' || device.platform == 'Android') {
-				//alert('registering android'); 
-            	pushNotification.register(app.regSuccessGCM, app.regErrorGCM, {"senderID":"48205136182","ecb":"app.onNotificationGCM"});		// required!
-            	
-			}
+    
+pushNotificationInit: function(){
+    
+    var push = PushNotification.init({
+        android: {
+            senderID: "48205136182"
+        },
+        ios: {
+                                     "sound": "true",
+                                     "vibration": "true",
+                                     "badge": "true",
+                                     "clearBadge": "true"
+        },
+        windows: {}
+    });
+    
+    push.on('registration', function(data) {
+            // data.registrationId
+            
+            console.log(JSON.stringify(data));
+            
+            app.apnDeviceId = data.registrationId;
+            app.persistApnDeviceId();
+            });
+    
+    push.on('notification', function(data) {
+            
+            console.log(JSON.stringify(data));
+            
+            // data.message,
+            // data.title,
+            // data.count,
+            // data.sound,
+            // data.image,
+            // data.additionalData
+            });
+    
+    push.on('error', function(e) {
+            
+        console.log("PUSH PLUGIN ERROR: " + JSON.stringify(e));
+            
+             //e.message
+    });
+    
+    /*
+    try{
+        pushNotification = window.plugins.pushNotification;
+        pushNotification.register(app.tokenHandler, app.errorHandler, {"badge":"true", "sound":"true", "alert":"true", "ecb":"app.onNotificationAPN"});
+        //alert('try');
+    }
+    catch(err){
+        txt="There was an error on this page.\n\n";
+        txt+="Error description: " + err.message + "\n\n";
+        alert(txt);
+    }
+     */
+    
+},
+    
+persistApnDeviceId: function(){
+    //alert(app.apnDeviceId);
+    $.ajax({
+        url: app.apiUrl + '/api/v4/user/deviceId/OS:iOS',
+        type: 'Post',
+        data: JSON.stringify({deviceId: app.apnDeviceId}),
+        error: function(data, status){
+           console.log("PUSH ERROR: " + JSON.stringify(data));
+        },
+        success: function(data, status){
+           console.log(JSON.stringify(data));
         }
-		catch(err){ 
-			txt="There was an error on this page.\n\n"; 
-			txt+="Error description: " + err.message + "\n\n"; 
-			alert(txt); 
-		} 
-		
-	},	
-	
-	// handle GCM notifications for Android
-    onNotificationGCM: function(e) {    	
-    	//alert(1);   
-    	//console.log('EVENT -> RECEIVED:' + e.event);        
-        switch( e.event ){
-            case 'registered':            
-            	//alert("registered");
-			if ( e.regid.length > 0 ){
-				// Your GCM push server needs to know the regID before it can push to this device
-				// here is where you might want to send it the regID for later use.
-				//alert("REGISTERED -> REGID:" + e.regid);
-				
-				app.gcmDeviceId = e.regid;
-				app.persistGcmDeviceId();
-			}
-            break;
+    });
+},
+    
+tokenHandler: function(result) {
+    console.log('success:'+ result);
+    app.apnDeviceId = result;
+    
+    //alert(window.localStorage.getItem("userId"));
+    //alert(window.localStorage.getItem("userId"));
+    //alert(result);
+    app.persistApnDeviceId();
+    
+    // Your iOS push server needs to know the token before it can push to this device
+    // here is where you might want to send it the token for later use.
+},
+    
+onNotificationAPN: function(event) {
+    if (event.alert) {
+        //navigator.notification.alert(event.alert);
+        
+        app.checkNewMessages();
+        
+        if(app.currentPageId != 'chat_page'){
+            //alert(app.currentPageId);
             
-            
-            case 'message':
-            	// if this flag is set, this notification happened while we were in the foreground.
-            	// you might want to play a sound to get the user's attention, throw up a dialog, etc.
-            	if (e.foreground){
-					// if the notification contains a soundname, play it.
-					//var my_media = new Media("/android_asset/www/"+e.soundname);
-					//my_media.play();
-            		
-            		if(app.currentPageId == 'messenger_page'){
-            			app.getMessenger();            			
-            		}
-            		
-            		
-            		app.checkNewMessages();
-            		
-				}
-				else
-				{	// otherwise we were launched because the user touched a notification in the notification tray.
-					
-					if (e.coldstart){
-						console.log('COLDSTART NOTIFICATION');
-						app.getMessenger();
-					}	
-					else{
-						console.log('--BACKGROUND NOTIFICATION--');
-						app.getMessenger();
-					}	
-					
-					//app.getMessenger();
-				}					
-            	//console.log('MESSAGE -> MSG: ' + e.payload.message);
-            	//console.log('MESSAGE -> MSGCNT: ' + e.payload.msgcnt);            	
-            	//alert(e.payload.message);
-            	
-            	  
-            	
-            	
-            break;
-            
-            case 'error':
-            	console.log('ERROR -> MSG:' + e.msg);
-            break;
-            
-            default:
-            	console.log('EVENT -> Unknown, an event was received and we do not know what it is');
-            break;
+            navigator.notification.confirm(
+                                           'קיבלת הודעה חדשה',  // message
+                                           app.pushNotificationChoice,              // callback to invoke with index of button pressed
+                                           'Notification',            // title
+                                           'Messenger,Later'          // buttonLabels
+                                           );
         }
-    },
+        
+        
+    }
     
-    persistGcmDeviceId: function(){
-    	$.ajax({				
-			url: app.apiUrl + '/api/v4/user/gcmDeviceId',
-			type: 'Post',
-			data: JSON.stringify({			
-				gcmDeviceId: app.gcmDeviceId 
-			}),
-			success: function(data, status){				
-				//alert(data.persisting);
-			}
-		});
-    	
-    },
+    if (event.sound) {
+        var snd = new Media(event.sound);
+        snd.play();
+    }
     
-    tokenHandler: function(result) {
-        //console.log('success:'+ result);        
-        // Your iOS push server needs to know the token before it can push to this device
-        // here is where you might want to send it the token for later use.
-    },
-	
-    regSuccessGCM: function (result) {
-    	//alert('success:'+ result);     
-    },
+    if (event.badge) {
+        //navigator.notification.alert('test');
+        pushNotification.setApplicationIconBadgeNumber(app.successHandler, app.errorHandler, event.badge);
+    }
+},
     
-    regErrorGCM: function (error) {
-    	//alert('error:'+ error);        
-    },
+errorHandler: function (error) {
+    //alert('error:'+ error);
+    //console.log('ERROR:'+ error);
+},
+    
+successHandler: function (result) {
+    //alert('success:'+ result);
+},
+    
+pushNotificationChoice: function(buttonPressedIndex){
+    if(buttonPressedIndex == 1){
+        app.getMessenger();
+        
+    }
+},
+    
+
 	
 	back: function(){		
 		//app.startLoading();
@@ -1903,7 +1927,7 @@ var app = {
 		if(message.length > 0){
 			$('#message').val('');			
 			$.ajax({
-				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith,
+				url: app.apiUrl + '/api/v4/user/chat_2/'+app.chatWith,
 				type: 'Post',
 				contentType: "application/json; charset=utf-8",
 				error: function(response){
