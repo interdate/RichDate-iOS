@@ -247,7 +247,7 @@
 						<div class="mb_wrap">
 							<div id="update_profile" onclick="app.getEditProfile();"><div class="text">עדכון פרופיל</div></div>
 						</div>
-						
+                    	
 						<div class="clear"></div>
 						
 						<br>
@@ -256,6 +256,8 @@
 						<div onclick="app.displayUserImages();"><button data-theme="a">נהלו תמונות</button></div>
 						<br>
 						<div onclick="app.showPage('contact_us_page');"><button data-theme="a">צרו קשר</button></div>
+                        <br>
+                        <div onclick="app.getSettings();"><button data-theme="a">הגדרות</button></div>
 						
 						
 
@@ -1040,6 +1042,37 @@
 				</div>
 			</div>
 			<!--End Edit Profile Page -->
+            
+            <!--Start Settings Page -->
+            <div id="settings_page"  class="appPage">
+                <div data-role="content">
+                    <div class="content_wrap">
+                        <h1>הגדרות</h1>
+                        <div class="dots"></div>
+                        <div class="clear"></div>
+                        <div class="regTxt_2">
+                            לקבל התראות על הודעות חדשות
+                        </div>
+                     
+
+<div data-role="fieldcontain">
+    <select name="newMessPushNotif" id="push_notif" data-role="slider" data-theme="c" data-track-theme="c">
+        <option value="0">לא</option>
+        <option value="1" selected="selected">כן</option>
+    </select>
+</div>
+
+
+<script>
+    /*
+    
+     */
+</script>
+
+                    </div>
+                </div>
+            </div>
+            <!--End Settings Page -->
 			
 		</div>
 		

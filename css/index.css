@@ -192,6 +192,12 @@ a{
 	font-weight: bold;
 }
 
+.regTxt_2{
+    color:#c8c8c9;
+    font-size:15px;
+    font-weight: bold;
+}
+
 #authForm #user_txt,#authForm #pass_txt{
 	width:100px;		
 }
@@ -1688,6 +1694,7 @@ a .mail_section{
 #contact_us_page,
 #do_likes_page,
 #likes_notifications_page,
+#settings_page,
 .pic_wrap,
 .appTemplates,
 .new_mes_count, 

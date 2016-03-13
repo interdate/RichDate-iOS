@@ -297,12 +297,13 @@ var app = {
 	},
 	
 	loggedUserInit: function(){
+        app.pushNotificationInit();
 		app.searchFuncsMainCall = true;
 		app.setBannerDestination();
 		app.checkNewMessages();
 		app.checkBingo();
 		
-		app.pushNotificationInit();
+		
 		app.sendUserPosition();
 	},
 	
@@ -491,10 +492,12 @@ pushNotificationInit: function(){
             senderID: "48205136182"
         },
         ios: {
-                                     "sound": "true",
-                                     "vibration": "true",
-                                     "badge": "true",
-                                     "clearBadge": "true"
+            "alert": "true",
+            "sound": "true",
+            "vibration": "true",
+            "badge": "true",
+            "clearBadge": "true",
+                                     
         },
         windows: {}
     });
@@ -510,15 +513,28 @@ pushNotificationInit: function(){
     
     push.on('notification', function(data) {
             
+            /*
             console.log(JSON.stringify(data));
             
-            // data.message,
-            // data.title,
-            // data.count,
-            // data.sound,
-            // data.image,
-            // data.additionalData
-            });
+            var count = push.getApplicationIconBadgeNumber(app.badgeNumberSuccessHandler, app.badgeNumberErrorHandler);
+            
+            count = count === undefined ? 1 : count + 1;
+            
+            console.log("COUNT: " + count);
+           
+            push.setApplicationIconBadgeNumber(
+                app.badgeNumberSuccessHandler,
+                app.badgeNumberErrorHandler,
+                count
+            );
+             */
+            
+            
+        if(!data.additionalData.foreground || app.currentPageId == 'messenger_page'){
+            app.getMessenger();
+        }
+            
+    });
     
     push.on('error', function(e) {
             
@@ -526,6 +542,9 @@ pushNotificationInit: function(){
             
              //e.message
     });
+    
+    
+    
     
     /*
     try{
@@ -539,6 +558,14 @@ pushNotificationInit: function(){
         alert(txt);
     }
      */
+    
+},
+    
+badgeNumberSuccessHandler: function(){
+    
+},
+    
+badgeNumberErrorHandler: function(){
     
 },
     
@@ -616,7 +643,51 @@ pushNotificationChoice: function(buttonPressedIndex){
         
     }
 },
+   
+    getSettings: function(name, value){
+        
+        app.startLoading();
+        
+        
+        $.ajax({
+            url: app.apiUrl + '/api/v4/user/settings',
+            type: 'Get',
+               error: function(response){
+               console.log(JSON.stringify(response));
+               },
+            success: function(response){
+               console.log(response);
+               
+               var val  = response.settings.newMessPushNotif == '1' ? 1 : 0;
+               $('#push_notif').val(val).slider("refresh").bind( "change",
+                    function(event, ui) {
+                        app.changeSettings($(this).attr('name'), $(this).val());
+                    }
+               );
+               
+               
+               app.showPage('settings_page');
+               app.stopLoading();
+            },
+        });
+    },
     
+    changeSettings: function(name, value){
+       
+        console.log(value);
+        
+        $.ajax({
+            url: app.apiUrl + '/api/v4/user/settings/' + name + '/' + value,
+            type: 'Post',
+               error: function(response){
+               console.log(JSON.stringify(response));
+               },
+            success: function(data){
+               console.log(data);
+               
+            },
+        });
+    },
 
 	
 	back: function(){		
@@ -1927,7 +1998,7 @@ pushNotificationChoice: function(buttonPressedIndex){
 		if(message.length > 0){
 			$('#message').val('');			
 			$.ajax({
-				url: app.apiUrl + '/api/v4/user/chat_2/'+app.chatWith,
+				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith,
 				type: 'Post',
 				contentType: "application/json; charset=utf-8",
 				error: function(response){
