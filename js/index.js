@@ -49,6 +49,7 @@ getUsersRequest = '';
 checkNewMessagesRequest = '';
 newMessages = '';
 checkBingo = '';
+refreshChat = '';
 
 
 
@@ -97,6 +98,7 @@ var app = {
 	bingos: [],
 	newNotificationsCount: 0,
     apnDeviceId: '',
+    apnInitialized: false,
 	
 		
 	init: function(){
@@ -243,7 +245,8 @@ var app = {
 			$('#logout').show();
 			$('#sign_up').hide();
 			$('#likesNotifications').show();
-			//$('#contact').show();	
+			//$('#contact').show();
+            
 			if(app.logged == 'nopay'){
 				app.currentPageId = 'main_page';
 				app.currentPageWrapper = $('#'+app.currentPageId);
@@ -716,6 +719,7 @@ pushNotificationChoice: function(buttonPressedIndex){
 			window.scrollTo(0, app.recentScrollPos);
 			app.setScrollEventHandler(2500,3500);
 		}
+        
 		else if(app.currentPageId == 'messenger_page'){
 			app.template = $('#messengerTemplate').html();
 			console.log(app.recentScrollPos);
@@ -1900,38 +1904,39 @@ pushNotificationChoice: function(buttonPressedIndex){
 			   console.log(JSON.stringify(app.response));
 			   },
 			success: function(response){				
-				app.response = response;
-				app.contactCurrentReadMessagesNumber = app.response.contactCurrentReadMessagesNumber;
-				console.log(JSON.stringify(app.response));
+				//app.response = response;
+				app.contactCurrentReadMessagesNumber = response.contactCurrentReadMessagesNumber;
+				//console.log(JSON.stringify(app.response));
 				app.showPage('chat_page');
 				window.scrollTo(0, 0);
 				app.container = app.currentPageWrapper.find('.chat_wrap');
 				app.container.html('');
 				app.template = $('#chatMessageTemplate').html();				
 				app.currentPageWrapper.find('.content_wrap').find("h1 span").text(userNick).attr('onclick','app.getUserProfile(\''+chatWith+'\')');
-				var html = app.buildChat();
-				app.container.html(html);
-				app.subscribtionButtonHandler();
+				var html = app.buildChat(response);
+				//app.container.html(html);
+                $('.chat_wrap').html(html);
+				app.subscribtionButtonHandler(response);
 				app.refreshChat();
 				app.stopLoading();
 			}
 		});
 	},
 	
-	subscribtionButtonHandler: function(){
-		if(app.response.chat.abilityReadingMessages == 0){					
+	subscribtionButtonHandler: function(response){
+		if(response.chat.abilityReadingMessages == 0){
 			app.container.find('.message_in .buySubscr').show().trigger('create');									
 		}
 	},
 	
-	buildChat: function(){
+	buildChat: function(response){
 		var html = '';
 		var k = 1;
 		var appendToMessage = '';
 				
-		for(var i in app.response.chat.items){					
+		for(var i in response.chat.items){
 			var currentTemplate = app.template; 
-			var message = app.response.chat.items[i];
+			var message = response.chat.items[i];
 			
 			
 			if(app.chatWith == message.from){
@@ -2008,12 +2013,16 @@ pushNotificationChoice: function(buttonPressedIndex){
 					message: message 
 				}),
 				success: function(response){
-				   console.log(JSON.stringify(response));
-					app.response = response;
-					var html = app.buildChat();
-					app.container.html(html);
-					app.subscribtionButtonHandler();
-					app.refreshChat();
+				   //console.log(JSON.stringify(response));
+                   app.stopLoading();
+                   if(app.currentPageId == 'chat_page'){
+                       app.response = response;
+					   var html = app.buildChat(response);
+					   //app.container.html(html);
+                       $('.chat_wrap').html(html);
+					   app.subscribtionButtonHandler(response);
+					   app.refreshChat();
+                   }
 				}
 			});
 		
@@ -2022,29 +2031,49 @@ pushNotificationChoice: function(buttonPressedIndex){
 	
 	
 	refreshChat: function(){
+        
+        if(refreshChat != ""){
+            refreshChat.abort();
+        }
+        
 		if(app.currentPageId == 'chat_page'){
-			$.ajax({
+			refreshChat = $.ajax({
 				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith+'/'+app.contactCurrentReadMessagesNumber+'/refresh',
 				type: 'Get',
 				complete: function(response, status, jqXHR){					
 					//app.stopLoading();
 				},
 				success: function(response){
-					if(app.currentPageId == 'chat_page'){
-					    app.response = response;
-					    app.contactCurrentReadMessagesNumber = app.response.contactCurrentReadMessagesNumber;
-						var html = app.buildChat();
-						if(app.response.chat != false){
-							app.container.html(html);
-							app.subscribtionButtonHandler();
+					
+					    //app.response = response;
+					    app.contactCurrentReadMessagesNumber = response.contactCurrentReadMessagesNumber;
+						
+                                 
+						
+                        if(app.response.chat != false){
+                            var html = app.buildChat(response);
+                                 
+                            if(app.currentPageId == 'chat_page'){
+                                 
+                                 //app.container.html(html);
+                                 console.log("RESPONSE HTML:" + html);
+                                 if(html != ''){
+                                 console.log("RESPONSE HTML ::" + html);
+                                    $('.chat_wrap').html(html);
+                                 }
+                                 app.subscribtionButtonHandler(response);
+                                 
+                            }
+                                 
+							
 						}
-        				refresh = setTimeout(app.refreshChat, 100);
-					}
+        				setTimeout(app.refreshChat, 300);
+					
 				}
 			});
 		}
 		else{
-			clearTimeout(refresh);
+			refreshChat.abort();
 		}
 		
 	},

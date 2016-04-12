@@ -7,11 +7,20 @@ products: {}
 var localStorage = window.localStorage || {};
 
 IAP.initialize = function () {
+   
 	// Check availability of the storekit plugin
 	if (!window.storekit) {
 		console.log('In-App Purchases not available');
 		return;
 	}
+    
+    if(app.apnInitialized){
+        return;
+    }
+    
+    app.apnInitialized = true;
+    
+    
 	
 	// Initialize
 	storekit.init({
@@ -24,6 +33,10 @@ IAP.initialize = function () {
 };
 
 IAP.onReady = function () {
+    
+    
+    
+    
 	// Once setup is done, load all product data.
 	storekit.load(IAP.list, function (products, invalidIds) {
 				  console.log('IAPs loading done:');
