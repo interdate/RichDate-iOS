@@ -141,12 +141,16 @@ var app = {
 					app.showPage('login_page');
 					//app.printUsers();
 					//app.alert('הכנסת מידע שגוי, אנא נסה שנית');
-					var resp = JSON.parse('{' + response.responseText.split('{')[1]);
+					var resArr = response.responseText.split('{');
+					if(resArr.length == 1){
+						resArr[1] = '}';
+					}
+					var resp = JSON.parse('{' + resArr[1]);
 					var url = false;
 					if(typeof resp.url != 'undefined'){
 						url = resp.url;
 					}
-					app.alert(response.responseText.split('{')[0], url);
+					app.alert(resArr[0], url);
 
 
 				}
@@ -159,6 +163,20 @@ var app = {
 			},
 
 			complete: function(response, status, jqXHR){
+				if(typeof response.responseText != 'undefined'){
+					var resArr = response.responseText.split('{');
+					if(resArr.length == 1){
+						resArr[1] = '}';
+					}
+					resArr = resArr.slice(1);
+					var resp = JSON.parse('{' + resArr.join("{"));
+					//alert(JSON.stringify(resp));
+					if(typeof resp.logged !== 'undefined'){
+						if(resp.logged !== app.logged && resp.userId !== null){
+							app.chooseMainPage();
+						}
+					}
+				}
 				app.stopLoading();
 				//console.log(JSON.stringify(response));
 			},
@@ -353,6 +371,7 @@ var app = {
 			success: function(data, status){
 				if(data.userId > 0){
 					//alert(data.logged);
+					app.response = data;
 					app.logged = data.logged;
 					window.localStorage.setItem("userId", data.userId);
 					app.UIHandler();
@@ -848,6 +867,7 @@ var app = {
 			app.requestUrl = app.apiUrl + '/api/v4/users/search/region:'+region+'/age:'+ageFrom+'-'+ageTo+'/nickName:'+nickName+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}
 		else if(app.action == 'getStatResults'){
+			app.itemsPerPage = 20;
 			app.requestUrl = app.apiUrl + '/api/v4/user/statistics/'+app.statAction+'/count:'+app.itemsPerPage+'/page:'+app.pageNumber+'/sort:'+app.sort;
 		}
 
@@ -1287,7 +1307,13 @@ var app = {
 		//$('#test_test_page').show();
 		app.showPage('upload_image_page');
 		app.container.find('.regInfo').text('אתם רשאים כעת להעלות תמונה בפורמט JPEG לפרופיל שלכם');  // Also you may upload an image in your profile now.
-
+		//alert(JSON.stringify(app.response));
+		
+		if(typeof app.response.text != 'undefined' && app.response.text != '')
+			app.currentPageWrapper.find('.myImagesText').text(app.response.text).show();
+		else
+			app.currentPageWrapper.find('.myImagesText').text('').hide();
+		
 		if(data){
 			object = JSON.parse(data);
 			if(object.userGender == 1){
@@ -1554,10 +1580,34 @@ var app = {
 		});
 	},
 
-
-
-
-
+	
+	manageLists: function(list, act, userId){
+		app.startLoading();
+		$.ajax({
+			url: app.apiUrl+'/api/v4/user/managelists/'+ list + '/' + act + '/' + userId,
+			type: 'Post',
+			contentType: "application/json; charset=utf-8",
+			error: function(response){
+				alert(JSON.stringify(response));
+			},
+			success: function(response, status, xhr){
+		   
+				//alert(JSON.stringify(response));
+				//return;
+		   
+				if(response.success){
+					app.alert(response.success);
+					app.container.find('.' + list + act).hide();
+					if(act == '1'){
+						app.container.find('.' + list + '0').show();
+					}else{
+						app.container.find('.' + list + '1').show();
+					}
+				}
+				app.stopLoading();
+			}
+		});
+	},
 
 
 	getUserProfile: function(userId){
@@ -1772,6 +1822,17 @@ var app = {
 				html = html + profileButtonsTemplate + profileButtonsTemplate_2;
 
 				detailsContainer.html(html).trigger('create');
+			   
+				var hideFavButton = 0;
+				if(user.is_in_favorite_list){
+					hideFavButton = 1;
+				}
+				var hideBlackButton = 0;
+				if(user.is_in_black_list){
+					hideBlackButton = 1;
+				}
+				detailsContainer.find('.favi'  + hideFavButton).hide();
+				detailsContainer.find('.black'  + hideBlackButton).hide();
 
 				app.stopLoading();
 			}
@@ -1847,8 +1908,12 @@ var app = {
 				//	pagesTracker.splice(pagesTracker.length-pagesTracker.indexOf('messenger_page'),pagesTracker.indexOf('messenger_page'));
 				//}
 				app.showPage('messenger_page');
-
-
+			   
+				/*var lastPage = pagesTracker[pagesTracker.length-1];
+				if(lastPage == "chat_page")
+					 pagesTracker.splice(pagesTracker.length-1,1);
+				*/
+			   
 				app.container = app.currentPageWrapper.find('.chats_wrap');
 				if(app.pageNumber == 1){
 					app.container.html('');
@@ -1872,8 +1937,16 @@ var app = {
 						var chat = app.response.allChats[i];
 						currentTemplate = currentTemplate.replace("[IMAGE]",chat.user.mainImage.url);
 						currentTemplate = currentTemplate.replace(/\[USERNICK\]/g,chat.user.nickName);
-						currentTemplate = currentTemplate.replace("[RECENT_MESSAGE]",chat.recentMessage.text);
-						currentTemplate = currentTemplate.replace("[DATE]", chat.recentMessage.date);
+						//	currentTemplate = currentTemplate.replace("[RECENT_MESSAGE]",chat.recentMessage.text);
+						var messageText = chat.recentMessage.text
+			   
+						if(chat.recentMessage.subscibe){
+							 messageText += ' רכישת מנוי';
+						}
+						if(chat.recentMessage.subscibe && chat.recentMessage.userHasFreePoints){							  messageText += '<div style="display:block;" class="useFreePoint"> או שימוש בנקודה</div>';
+						}
+						currentTemplate = currentTemplate.replace("[RECENT_MESSAGE]",messageText);
+				 		currentTemplate = currentTemplate.replace("[DATE]", chat.recentMessage.date);
 						currentTemplate = currentTemplate.replace("[USER_ID]", chat.user.userId);
 						app.container.append(currentTemplate);
 
@@ -1914,7 +1987,8 @@ var app = {
 	},
 
 	getChat: function(chatWith, userNick){
-		if(chatWith===window.localStorage.getItem("userId")){app.getMyProfileData(); return;}
+		//alert(chatWith + ' | ' + userNick);
+		if(chatWith === window.localStorage.getItem("userId")){app.getMyProfileData(); return;}
 		app.chatWith = chatWith;
 		app.startLoading();
 		$.ajax({
@@ -1930,7 +2004,8 @@ var app = {
 				window.scrollTo(0, 0);
 				app.container = app.currentPageWrapper.find('.chat_wrap');
 				app.container.html('');
-				app.template = $('#chatMessageTemplate').html();
+				//app.template = $('#chatMessageTemplate').html();
+				userNick = userNick.replace(/'/g, "׳");
 				app.currentPageWrapper.find('.content_wrap').find("h1 span").text(userNick).attr('onclick','app.getUserProfile(\''+chatWith+'\')');
 				var html = app.buildChat(response);
 				//app.container.html(html);
@@ -1944,7 +2019,17 @@ var app = {
 
 	subscribtionButtonHandler: function(response){
 		if(response.chat.abilityReadingMessages == 0){
-			app.container.find('.message_in .buySubscr').show().trigger('create');
+			//app.container.find('.message_in .buySubscr').show().trigger('create');
+			var buttonContainer = $('.chat_wrap .message_in .buySubscr');
+			$(buttonContainer).each(function(){
+				var isRead = $(this).siblings('.isRead').val();
+				if(isRead == 0){
+					$(this).show();
+					if(response.chat.userHasFreePoints){
+						$(this).siblings('.useFreePoint').show();
+					}
+				}
+			});
 		}
 	},
 
@@ -1952,9 +2037,17 @@ var app = {
 		var html = '';
 		var k = 1;
 		var appendToMessage = '';
+		var unreadMessages = [];
+			   
+		if(response.chat.abilityReadingMessages == 0){
+		   //var appendToMessage = '<br /><span onclick="app.getSubscription();" class="ui-link">לחצי כאן לרכישת מנוי</span>';
+		   var appendToMessage = '';
+		}
+			   
+		var template = $('#chatMessageTemplate').html();
 
 		for(var i in response.chat.items){
-			var currentTemplate = app.template;
+			var currentTemplate = template;
 			var message = response.chat.items[i];
 
 
@@ -1965,7 +2058,15 @@ var app = {
 				var messageStatusVisibility = 'hidden';
 				var messageStatusImage = '';
 				var info = "info_left";
-				//var isRead = "";
+				var sender = '0';
+			   
+				if(response.chat.abilityReadingMessages == 1 && message.isRead == 0){
+					unreadMessages.push(message.id);
+				}
+				else if(response.chat.abilityReadingMessages == 0 && message.isRead == 0){
+					message.text = message.text.replace("...", "");
+				}
+			   
 			}
 			else {
 				var messageType = "message_out";
@@ -1973,11 +2074,15 @@ var app = {
 				var info = "info_right";
 				var messageStatusVisibility = '';
 				var messageStatusImage = (message.isRead == 1) ? 'messageRead.jpg' : 'messageSaved.jpg';
+				var sender = '1';
 				//console.log(message.isRead);
 				//var isRead = (message.isRead == 0) ? "checked" : "double_checked";
 			}
 
-
+			if(message.from == '0' && message.to == '0'){
+				currentTemplate = '';
+				setTimeout(function(){app.alert(message.alert);},500);
+			}
 			/*
 			 if(app.chatWith == message.from){
 			 var messageType = "message_in";				
@@ -1997,15 +2102,19 @@ var app = {
 			 info = "info_left";
 			 }
 			 */
-
-			currentTemplate = currentTemplate.replace("[MESSAGE]", message.text);
-			currentTemplate = currentTemplate.replace("[DATE]", message.date);
+			   
+			currentTemplate = currentTemplate.replace(/\[MESSAGE_ID\]/g, message.id);
+			currentTemplate = currentTemplate.replace(/\[MESSAGE\]/g, message.text);
+			currentTemplate = currentTemplate.replace("[IS_READ]", message.isRead);
+			currentTemplate = currentTemplate.replace(/\[DATE\]/g, message.date);
 			currentTemplate = currentTemplate.replace("[TIME]", message.time);
 			currentTemplate = currentTemplate.replace("[MESSAGE_TYPE]", messageType);
-			currentTemplate = currentTemplate.replace("[MESSAGE_FLOAT]", messageFloat);
+			currentTemplate = currentTemplate.replace(/\[MESSAGE_FLOAT\]/g, messageFloat);
 			currentTemplate = currentTemplate.replace("[MESSAGE_STATUS_VISIBILITY]", messageStatusVisibility);
 			currentTemplate = currentTemplate.replace("[MESSAGE_STATUS_IMAGE]", messageStatusImage);
 			currentTemplate = currentTemplate.replace("[INFO]", info);
+			currentTemplate = currentTemplate.replace("[SENDER]", sender);
+
 
 			html = html + currentTemplate;
 
@@ -2013,9 +2122,58 @@ var app = {
 
 			//k++;
 		}
+		
+		app.setMessagesAsRead(unreadMessages);
 
 		return html;
 	},
+			   
+			   
+	setMessagesAsRead: function(unreadMessages){
+			   
+		////console.log(JSON.stringify({unreadMessages: unreadMessages}));
+			   
+		if(unreadMessages.length == 0)
+			return;
+			   
+			   
+		$.ajax({
+			url: app.apiUrl + '/api/v4/user/messenger/setMessagesAsRead',
+			error: function(response){
+				//console.log(JSON.stringify(response));
+			},
+			type: 'Post',
+			contentType: "application/json; charset=utf-8",
+			data: JSON.stringify({
+				unreadMessages: unreadMessages
+			}),
+			success: function(response){
+				////console.log("SUCCESS: " + JSON.stringify(response) );
+			}
+		});
+	},
+			   
+			   
+	useFreePointToReadMessage: function(clickedObj,messageId){
+		app.startLoading();
+			   
+		//console.log('http://m.dating4disabled.com/api/v5/user/chat/useFreePointToReadMessage/' + messageId);
+			   
+		$.ajax({
+			url: app.apiUrl + '/api/v4/user/chat/useFreePointToReadMessage/' + messageId,
+			error: function(response){
+				//console.log("ERROR: " + JSON.stringify(response));
+			},
+			success: function(response){
+				$(clickedObj).parents('.useFreePoint').parents('.message_cont').html(response.messageText);
+				if(!response.userHasFreePoints){
+					$('.useFreePoint').hide();
+				}
+				app.stopLoading();
+			}
+		});
+	},
+			   
 
 	sendMessage: function(){
 		var message = $('#message').val();
@@ -2059,6 +2217,7 @@ var app = {
 			refreshChat = $.ajax({
 				url: app.apiUrl + '/api/v4/user/chat/'+app.chatWith+'/'+app.contactCurrentReadMessagesNumber+'/refresh',
 				type: 'Get',
+				timeout: 30000,
 				complete: function(response, status, jqXHR){
 					//app.stopLoading();
 				},
@@ -2066,7 +2225,7 @@ var app = {
 
 					//app.response = response;
 					app.contactCurrentReadMessagesNumber = response.contactCurrentReadMessagesNumber;
-
+								 
 
 
 					if(app.response.chat != false){
@@ -2203,9 +2362,13 @@ var app = {
 				app.container = app.currentPageWrapper.find('.imagesListWrap');
 				app.container.html('');
 				app.template = $('#editImageTemplate').html();
+				if(typeof app.response.text != 'undefined' && app.response.text != '')
+					app.currentPageWrapper.find('.myImagesText').text(app.response.text).show();
+				else
+					app.currentPageWrapper.find('.myImagesText').text('').hide();
 				window.scrollTo(0,0);
 
-				//alert(JSON.stringify(app.response));				
+				//alert(JSON.stringify(app.response));
 				if(app.response.images.itemsNumber < 4)
 					$('.imagesButtonsWrap').show();
 
@@ -2277,7 +2440,7 @@ var app = {
 		var ft = new FileTransfer();
 		ft.upload(
 			imageURI,
-			encodeURI("http://m.richdate.co.il/api/v4/user/image"),
+			encodeURI(app.apiUrl + "/api/v4/user/image"),
 			app.uploadSuccess,
 			app.uploadFailure,
 			options
@@ -2895,7 +3058,7 @@ var app = {
 				template = template.replace("[USER_ID]", bingo.userId);
 				template = template.replace(/\[USERNICK\]/g, bingo.nickName);
 
-				$('#bingo_page').css({"background":"url('" + userImageUrl_2 + "') no-repeat center center", "background-size":"cover"}).html(template);
+				$('#bingo_page').css({"background":"url('" + bingo.userImageUrl_2 + "') no-repeat center center", "background-size":"cover"}).html(template);
 				app.showPage('bingo_page');
 
 				app.bingoIsActive = true;

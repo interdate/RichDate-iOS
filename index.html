@@ -196,7 +196,7 @@
 			<!--Start Main Page -->
 			<div id="main_page"  class="appPage">
 				<div data-role="content" data-scroll="false">
-					<div class="content_wrap">
+					<div class="content_wrap" style="width: 300px;">
 						
 						
 						<div class="mb_wrap" onclick="app.getSearchForm();">
@@ -252,11 +252,11 @@
 						
 						<br>
 						<div onclick="app.getMyProfileData();"><button data-theme="a">פרופיל אישי</button></div>
-						<br>
+						
 						<div onclick="app.displayUserImages();"><button data-theme="a">נהלו תמונות</button></div>
-						<br>
+						
 						<div onclick="app.showPage('contact_us_page');"><button data-theme="a">צרו קשר</button></div>
-                        <br>
+						
                         <div onclick="app.getSettings();"><button data-theme="a">הגדרות</button></div>
 						
 						
@@ -738,6 +738,7 @@
 					<div class="content_wrap">
 						<h1>תמונות שלי</h1>
 						<div class="dots"></div>
+						<p class="myImagesText"></p>
 						<div class="imagesButtonsWrap">
 							
 							<button class="take_a_photo" data-theme="a" onclick="app.capturePhoto(app.pictureSource.CAMERA, app.destinationType.FILE_URI);">הפעל מצלמה</button>
@@ -784,7 +785,7 @@
 						<h1>העלאת תמונה</h1>
 						<div class="dots"></div>
 						<div class="regInfo"></div>
-						
+						<p class="myImagesText"></p>
 						<button class="take_a_photo" data-theme="a" onclick="app.capturePhoto(app.pictureSource.CAMERA, app.destinationType.FILE_URI);">הפעל מצלמה</button>
 
 						<button class="choose_from_library" data-theme="a" onclick="app.capturePhoto(app.pictureSource.PHOTOLIBRARY, app.destinationType.FILE_URI);">תמונה מגלריה</button>
@@ -1109,7 +1110,14 @@
 			<div id="userProfileButtonsTemplate">
 				<button onclick="app.getChat([USER_ID],'[USERNICK]');" data-theme="a">שליחת הודעה</button>
 				<div class="clear"></div>
-                <button onclick="app.addToFavorites([USER_ID]);" data-theme="a">הוספה למועדפים</button>
+				<div class="favi0">
+					<button onclick="app.manageLists('favi', 0, [USER_ID]);" data-theme="a">להסיר מהמועדפים</button>
+				</div>
+				<div class="clear"></div>
+				<div class="favi1">
+					<button onclick="app.manageLists('favi', 1, [USER_ID]);" data-theme="a">הוסף למועדפים</button>
+				</div>
+				<div class="clear"></div>
 				<br />
 			</div>
 			<!-- END User Profile Buttons Template -->
@@ -1118,7 +1126,14 @@
 			<div id="userProfileButtonsTemplate_2">
 				<button onclick="app.showPage('report_abuse_page')" data-theme="a">דווחו למערכת על כרטיס לא תקין</button>
 				<div class="clear"></div>
-                <button onclick="app.addToBlackList([USER_ID]);" data-theme="a">הוספה לרשימה שחורה</button>
+				<div class="black1">
+					<button onclick="app.manageLists('black', 1, [USER_ID]);" data-theme="a">הוסף לרשימה השחורה</button>
+				</div>
+				<div class="clear"></div>
+				<div class="black0">
+					<button onclick="app.manageLists('black', 0, [USER_ID]);" data-theme="a">להסיר מהרשימה השחורה</button>
+				</div>
+				<div class="clear"></div>
 				<br />
 			</div>
 			<!-- END User Profile Buttons Template 2-->
@@ -1158,7 +1173,9 @@
 					<div class="new_mes_count"></div>
 					<div class="txt">
 						<strong>[USERNICK]</strong><br />
-						[RECENT_MESSAGE]
+						<div class="messager">
+							[RECENT_MESSAGE]
+						</div>
 					</div>
 					<img src="[IMAGE]" />
 					<span>[DATE]</span>
@@ -1172,7 +1189,14 @@
 			<div id="chatMessageTemplate">
 				<div class="[MESSAGE_TYPE] [MESSAGE_FLOAT]">
 					[MESSAGE]
-					<div class="buySubscr"><button onclick="app.getSubscription();" data-theme="a">רכישת מנוי</button></div></div>
+					<div class="buySubscr"><button onclick="app.getSubscription();" data-theme="a">רכישת מנוי</button></div>
+					<div class="useFreePoint">
+						או
+						<br>
+						<button onclick="app.useFreePointToReadMessage(this,[MESSAGE_ID]);" data-theme="a">לשימוש בנקודה</button>
+					</div>
+					<input type="hidden" class="isRead" value="[IS_READ]">
+				</div>
 				<div class="message_status [MESSAGE_STATUS_VISIBILITY]"><img src="images/[MESSAGE_STATUS_IMAGE]"></div>
 				<div class="message_info [INFO]">נשלח ב: [DATE] בשעה: [TIME]</div>
 			</div>
